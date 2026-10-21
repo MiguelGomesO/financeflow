@@ -3,7 +3,7 @@
 
 <x-ui.card title="Metas" action="Ver metas" :action-href="route('goals')">
     <ul class="flex flex-col gap-3">
-        @foreach ($goals as $goal)
+        @forelse ($goals as $goal)
             @php($percent = $goal['target'] > 0 ? (int) round($goal['saved'] / $goal['target'] * 100) : 0)
 
             <li wire:key="goal-{{ $goal['name'] }}" class="flex items-center gap-4 rounded-2xl bg-canvas p-3.5">
@@ -20,6 +20,8 @@
                     <x-ui.progress-bar :value="$percent" track="bg-line" size="h-1.5" :label="'Progresso de '.$goal['name']" />
                 </div>
             </li>
-        @endforeach
+        @empty
+            <li class="py-6 text-center text-muted">Nenhuma meta ainda.</li>
+        @endforelse
     </ul>
 </x-ui.card>

@@ -11,12 +11,44 @@ class Dates
         'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro',
     ];
 
+    /** 10 => "outubro" */
+    public static function monthName(int $month): string
+    {
+        return self::MONTHS[$month];
+    }
+
+    /** 10 => "Out" */
+    public static function monthAbbr(int $month): string
+    {
+        return ucfirst(mb_substr(self::MONTHS[$month], 0, 3));
+    }
+
     /** "2026-10" => "Outubro de 2026" */
     public static function monthLabel(string $month): string
     {
         $date = Carbon::createFromFormat('!Y-m', $month);
 
         return ucfirst(self::MONTHS[$date->month]).' de '.$date->year;
+    }
+
+    /**
+     * Intervalo de meses ("Y-m"):
+     * "outubro de 2026", "agosto a outubro de 2026" ou "novembro de 2025 a abril de 2026".
+     */
+    public static function rangeLabel(string $from, string $to): string
+    {
+        $start = Carbon::createFromFormat('!Y-m', $from);
+        $end = Carbon::createFromFormat('!Y-m', $to);
+
+        if ($from === $to) {
+            return self::MONTHS[$end->month].' de '.$end->year;
+        }
+
+        if ($start->year === $end->year) {
+            return self::MONTHS[$start->month].' a '.self::MONTHS[$end->month].' de '.$end->year;
+        }
+
+        return self::MONTHS[$start->month].' de '.$start->year.' a '.self::MONTHS[$end->month].' de '.$end->year;
     }
 
     /** "2027-06" => "jun/2027" */

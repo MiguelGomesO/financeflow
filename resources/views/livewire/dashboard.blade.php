@@ -31,7 +31,7 @@
             tone="dark"
             label="Saldo total"
             :value="Money::brl($stats['balance'])"
-            :hint="$stats['accounts'].' contas'"
+            :hint="$stats['accounts'] === 1 ? '1 conta' : $stats['accounts'].' contas'"
         />
         <x-ui.stat-card tone="income" label="Entradas" :value="Money::brl($stats['income'])" :hint="$periods[$period]" />
         <x-ui.stat-card tone="expense" label="Saídas" :value="Money::brl($stats['expense'])" :hint="$periods[$period]" />
@@ -48,5 +48,5 @@
         <x-dashboard.goals-list :goals="$goals" />
     </div>
 
-    <x-dashboard.new-transaction-modal />
+    <livewire:create-transaction />
 </div>

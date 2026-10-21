@@ -4,7 +4,7 @@
 
 <x-ui.card title="Orçamentos" action="Editar" :action-href="route('budgets')">
     <ul class="flex flex-col gap-[18px]">
-        @foreach ($budgets as $budget)
+        @forelse ($budgets as $budget)
             @php($status = BudgetStatus::for($budget['spent'], $budget['limit']))
 
             <li wire:key="budget-{{ $budget['name'] }}" class="flex flex-col gap-2">
@@ -21,6 +21,8 @@
                 </div>
                 <x-ui.progress-bar :value="$status['percent']" :color="$status['bar']" :label="'Orçamento de '.$budget['name']" />
             </li>
-        @endforeach
+        @empty
+            <li class="py-6 text-center text-muted">Nenhum orçamento para este mês.</li>
+        @endforelse
     </ul>
 </x-ui.card>

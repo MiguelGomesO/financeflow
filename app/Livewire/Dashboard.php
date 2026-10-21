@@ -2,7 +2,9 @@
 
 namespace App\Livewire;
 
-use App\Support\SampleData;
+use App\Queries\DashboardQuery;
+use App\Support\Dates;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -36,36 +38,35 @@ class Dashboard extends Component
         $this->normalizePeriod();
     }
 
-    private function normalizePeriod(): void
-    {
-        if (! array_key_exists($this->period, self::PERIODS)) {
-            $this->period = 'month';
-        }
-    }
+    /** Recarrega os números quando uma transação é criada no modal. */
+    #[On('transaction-created')]
+    public function refreshData(): void {}
 
     public function render()
     {
-        $accounts = $this->accounts();
-        $months = $this->markPeriod($this->cashFlow());
-        $inPeriod = array_filter($months, fn (array $m) => $m['in_period']);
+        $query = new DashboardQuery(now());
+
+        $accounts = $query->accounts();
+        $months = $this->markPeriod($query->cashFlow());
+        $inPeriod = array_values(array_filter($months, fn (array $m) => $m['in_period']));
 
         $income = array_sum(array_column($inPeriod, 'income'));
         $expense = array_sum(array_column($inPeriod, 'expense'));
 
         return view('livewire.dashboard', [
             'periods' => self::PERIODS,
-            'rangeLabel' => $this->rangeLabel($inPeriod),
+            'rangeLabel' => Dates::rangeLabel($inPeriod[0]['key'], end($inPeriod)['key']),
             'stats' => [
-                'balance' => array_sum(array_column($accounts, 'balance')),
-                'accounts' => count($accounts),
+                'balance' => $accounts['balance'],
+                'accounts' => $accounts['count'],
                 'income' => $income,
                 'expense' => $expense,
                 'savingsRate' => $income > 0 ? (int) round(($income - $expense) / $income * 100) : 0,
             ],
             'months' => $months,
-            'budgets' => $this->budgets(),
-            'transactions' => $this->recentTransactions(),
-            'goals' => $this->goals(),
+            'budgets' => $query->budgets(),
+            'transactions' => $query->recentTransactions(),
+            'goals' => $query->goals(),
         ]);
     }
 
@@ -81,48 +82,10 @@ class Dashboard extends Component
         return $months;
     }
 
-    private function rangeLabel(array $months): string
+    private function normalizePeriod(): void
     {
-        $months = array_values($months);
-        $first = $months[0]['name'];
-        $last = $months[count($months) - 1]['name'];
-
-        return $first === $last ? "{$last} de 2026" : "{$first} a {$last} de 2026";
-    }
-
-    // ---------------------------------------------------------------------
-    // Dados de exemplo — serão substituídos pelas consultas ao banco.
-    // ---------------------------------------------------------------------
-
-    private function accounts(): array
-    {
-        return SampleData::accounts();
-    }
-
-    private function cashFlow(): array
-    {
-        return [
-            ['label' => 'Mai', 'name' => 'maio', 'income' => 7500, 'expense' => 6100],
-            ['label' => 'Jun', 'name' => 'junho', 'income' => 7500, 'expense' => 6900],
-            ['label' => 'Jul', 'name' => 'julho', 'income' => 7800, 'expense' => 7700],
-            ['label' => 'Ago', 'name' => 'agosto', 'income' => 8100, 'expense' => 6300],
-            ['label' => 'Set', 'name' => 'setembro', 'income' => 7500, 'expense' => 5400],
-            ['label' => 'Out', 'name' => 'outubro', 'income' => 8250, 'expense' => 4297],
-        ];
-    }
-
-    private function budgets(): array
-    {
-        return array_slice(SampleData::budgets()[SampleData::currentMonth()], 0, 5);
-    }
-
-    private function recentTransactions(): array
-    {
-        return array_slice(SampleData::transactions(), 0, 6);
-    }
-
-    private function goals(): array
-    {
-        return array_slice(SampleData::goals(), 0, 3);
+        if (! array_key_exists($this->period, self::PERIODS)) {
+            $this->period = 'month';
+        }
     }
 }
