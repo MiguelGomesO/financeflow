@@ -67,14 +67,6 @@ class TransactionsTest extends TestCase
             ->assertHasErrors(['form.description', 'form.amount']);
     }
 
-    public function test_deletes_a_transaction(): void
-    {
-        Livewire::test(Transactions::class)
-            ->assertSee('Cinema')
-            ->call('delete', 9)
-            ->assertDontSee('Cinema');
-    }
-
     public function test_parses_brazilian_amounts(): void
     {
         $this->assertSame(1234.56, TransactionForm::parseAmount('1.234,56'));

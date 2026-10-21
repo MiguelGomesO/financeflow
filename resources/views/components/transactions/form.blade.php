@@ -36,7 +36,7 @@
 
         <div class="grid grid-cols-2 gap-3">
             <x-ui.field label="Categoria" for="tx-category" error="form.category">
-                <select id="tx-category" wire:model="form.category" class="input">
+                <select id="tx-category" wire:model="form.category" class="input px-2.5">
                     @foreach ($categories as $category)
                         <option value="{{ $category }}">{{ $category }}</option>
                     @endforeach
@@ -44,7 +44,7 @@
             </x-ui.field>
 
             <x-ui.field label="Conta" for="tx-account" error="form.account">
-                <select id="tx-account" wire:model="form.account" class="input">
+                <select id="tx-account" wire:model="form.account" class="input px-2.5">
                     @foreach ($accounts as $account)
                         <option value="{{ $account }}">{{ $account }}</option>
                     @endforeach

@@ -41,8 +41,8 @@
         @case('search')
             <circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" />
             @break
-        @case('trash')
-            <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" /><path d="M10 11v6M14 11v6" />
+        @case('download')
+            <path d="M12 3v12M7 10l5 5 5-5" /><path d="M4 21h16" />
             @break
     @endswitch
 </svg>

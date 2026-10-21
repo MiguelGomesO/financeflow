@@ -55,13 +55,6 @@ class Transactions extends Component
         $this->dispatch('transaction-saved');
     }
 
-    public function delete(int $id): void
-    {
-        $this->transactions = array_values(
-            array_filter($this->transactions, fn (array $t) => $t['id'] !== $id)
-        );
-    }
-
     public function clearFilters(): void
     {
         $this->reset('search', 'type', 'category');

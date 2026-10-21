@@ -38,12 +38,12 @@
         <x-ui.stat-card label="Economia" :value="$stats['savingsRate'].'%'" hint="da renda guardada" />
     </div>
 
-    <div class="grid gap-4 xl:grid-cols-2">
+    <div class="grid grid-cols-1 gap-4 xl:grid-cols-2">
         <x-dashboard.cash-flow-chart :months="$months" />
         <x-dashboard.budget-list :budgets="$budgets" />
     </div>
 
-    <div class="grid gap-4 xl:grid-cols-2">
+    <div class="grid grid-cols-1 gap-4 xl:grid-cols-2">
         <x-dashboard.recent-transactions :transactions="$transactions" />
         <x-dashboard.goals-list :goals="$goals" />
     </div>
