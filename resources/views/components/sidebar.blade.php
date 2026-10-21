@@ -28,7 +28,7 @@
         <x-sidebar.link :href="route('dashboard')" icon="overview" :active="request()->routeIs('dashboard')">Visão geral</x-sidebar.link>
         <x-sidebar.link :href="route('transactions')" icon="transactions" :active="request()->routeIs('transactions')">Transações</x-sidebar.link>
         <x-sidebar.link :href="route('budgets')" icon="budget" :active="request()->routeIs('budgets')">Orçamentos</x-sidebar.link>
-        <x-sidebar.link href="#" icon="goal">Metas</x-sidebar.link>
+        <x-sidebar.link :href="route('goals')" icon="goal" :active="request()->routeIs('goals')">Metas</x-sidebar.link>
         <x-sidebar.link href="#" icon="card">Contas e cartões</x-sidebar.link>
     </nav>
 

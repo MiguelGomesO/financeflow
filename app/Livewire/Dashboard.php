@@ -123,10 +123,6 @@ class Dashboard extends Component
 
     private function goals(): array
     {
-        return [
-            ['name' => 'Reserva de emergência', 'saved' => 9000, 'target' => 15000],
-            ['name' => 'Viagem de férias', 'saved' => 2400, 'target' => 6000],
-            ['name' => 'Notebook novo', 'saved' => 3600, 'target' => 4500],
-        ];
+        return array_slice(SampleData::goals(), 0, 3);
     }
 }

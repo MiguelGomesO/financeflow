@@ -59,6 +59,28 @@ class SampleData
         );
     }
 
+    /** Metas de economia; "due" é o mês-limite ("Y-m"). */
+    public static function goals(): array
+    {
+        return [
+            ['id' => 1, 'name' => 'Reserva de emergência', 'saved' => 9000, 'target' => 15000, 'due' => '2027-06'],
+            ['id' => 2, 'name' => 'Viagem de férias', 'saved' => 2400, 'target' => 6000, 'due' => '2027-12'],
+            ['id' => 3, 'name' => 'Notebook novo', 'saved' => 3600, 'target' => 4500, 'due' => '2027-01'],
+            ['id' => 4, 'name' => 'Entrada do apartamento', 'saved' => 12000, 'target' => 60000, 'due' => '2030-12'],
+        ];
+    }
+
+    /** Depósitos nas metas, mais recentes primeiro. */
+    public static function goalDeposits(): array
+    {
+        return [
+            ['id' => 4, 'goal_id' => 1, 'date' => '2026-10-20', 'account' => 'Conta corrente', 'amount' => 750],
+            ['id' => 3, 'goal_id' => 3, 'date' => '2026-10-15', 'account' => 'Conta corrente', 'amount' => 450],
+            ['id' => 2, 'goal_id' => 4, 'date' => '2026-10-10', 'account' => 'Conta corrente', 'amount' => 900],
+            ['id' => 1, 'goal_id' => 2, 'date' => '2026-10-05', 'account' => 'Poupança', 'amount' => 300],
+        ];
+    }
+
     /** Transações mais recentes primeiro. */
     public static function transactions(): array
     {

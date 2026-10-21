@@ -1,7 +1,7 @@
 @use('App\Support\Money')
 @props(['goals'])
 
-<x-ui.card title="Metas" action="Ver metas">
+<x-ui.card title="Metas" action="Ver metas" :action-href="route('goals')">
     <ul class="flex flex-col gap-3">
         @foreach ($goals as $goal)
             @php($percent = $goal['target'] > 0 ? (int) round($goal['saved'] / $goal['target'] * 100) : 0)
