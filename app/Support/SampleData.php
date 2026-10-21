@@ -33,9 +33,18 @@ class SampleData
     public static function accounts(): array
     {
         return [
-            ['name' => 'Conta corrente', 'balance' => 4180.55],
-            ['name' => 'Poupança', 'balance' => 8420.00],
-            ['name' => 'Carteira', 'balance' => 240.00],
+            ['id' => 1, 'name' => 'Conta corrente', 'type' => 'Conta corrente', 'institution' => 'Banco principal', 'balance' => 4180.55, 'note' => 'Recebe o salário'],
+            ['id' => 2, 'name' => 'Poupança', 'type' => 'Poupança', 'institution' => 'Banco principal', 'balance' => 8420.00, 'note' => 'Reserva de emergência'],
+            ['id' => 3, 'name' => 'Carteira', 'type' => 'Carteira', 'institution' => 'Dinheiro em espécie', 'balance' => 240.00, 'note' => 'Atualizado em 19/10'],
+        ];
+    }
+
+    /** Cartões de crédito; "bill" é a fatura atual em aberto. */
+    public static function cards(): array
+    {
+        return [
+            ['id' => 1, 'name' => 'Cartão principal', 'last4' => '4821', 'bill' => 1386.40, 'limit' => 5000, 'close_day' => 3, 'due_day' => 10],
+            ['id' => 2, 'name' => 'Cartão reserva', 'last4' => '0937', 'bill' => 512.90, 'limit' => 2500, 'close_day' => 15, 'due_day' => 22],
         ];
     }
 

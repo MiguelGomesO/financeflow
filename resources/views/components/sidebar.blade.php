@@ -29,7 +29,7 @@
         <x-sidebar.link :href="route('transactions')" icon="transactions" :active="request()->routeIs('transactions')">Transações</x-sidebar.link>
         <x-sidebar.link :href="route('budgets')" icon="budget" :active="request()->routeIs('budgets')">Orçamentos</x-sidebar.link>
         <x-sidebar.link :href="route('goals')" icon="goal" :active="request()->routeIs('goals')">Metas</x-sidebar.link>
-        <x-sidebar.link href="#" icon="card">Contas e cartões</x-sidebar.link>
+        <x-sidebar.link :href="route('accounts')" icon="card" :active="request()->routeIs('accounts')">Contas e cartões</x-sidebar.link>
     </nav>
 
     <div class="mt-auto flex items-center gap-3 rounded-2xl bg-ink-800 p-4">
