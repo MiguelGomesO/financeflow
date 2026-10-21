@@ -72,6 +72,8 @@ class TransactionsTest extends TestCase
         $this->assertSame(1234.56, Money::parse('1.234,56'));
         $this->assertSame(25.9, Money::parse('25,90'));
         $this->assertSame(12.5, Money::parse('12.50'));
+        $this->assertSame(8000.0, Money::parse('8.000'));
+        $this->assertSame(1250000.0, Money::parse('1.250.000'));
         $this->assertSame(0.0, Money::parse('abc'));
     }
 }
