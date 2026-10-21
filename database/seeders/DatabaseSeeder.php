@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
             'email' => 'test@example.com',
         ]);
 
-        $this->call(DemoSeeder::class);
+        // Dados de demonstração não entram por padrão. Para carregar:
+        // php artisan db:seed --class=DemoSeeder
     }
 }
