@@ -41,6 +41,9 @@
         @case('search')
             <circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" />
             @break
+        @case('pencil')
+            <path d="M12 20h9" /><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z" />
+            @break
         @case('download')
             <path d="M12 3v12M7 10l5 5 5-5" /><path d="M4 21h16" />
             @break

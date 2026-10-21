@@ -4,7 +4,9 @@ namespace App\Livewire;
 
 use App\Livewire\Forms\AccountForm;
 use App\Livewire\Forms\TransferForm;
-use App\Support\SampleData;
+use App\Models\Account;
+use App\Models\CreditCard;
+use App\Models\Transfer;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
@@ -15,82 +17,160 @@ class Accounts extends Component
 
     public TransferForm $transfer;
 
-    /** Por enquanto contas e cartões vivem no estado do componente (sem banco). */
-    public array $accounts = [];
+    /** O que está aberto no modal de edição: "account" ou "card" (null = criando). */
+    public ?string $editingKind = null;
 
-    public array $cards = [];
+    public ?int $editingId = null;
 
-    public function mount(): void
-    {
-        $this->accounts = SampleData::accounts();
-        $this->cards = SampleData::cards();
-    }
+    /** Motivo de uma exclusão recusada, mostrado no modal. */
+    public ?string $deleteError = null;
 
     public function openCreate(): void
     {
+        $this->resetEditing();
         $this->form->clear();
 
-        $this->dispatch('open-modal', name: 'new-account');
+        $this->dispatch('open-modal', name: 'account-form');
     }
 
-    public function openTransfer(): void
+    public function editAccount(int $id): void
     {
-        $this->transfer->clear();
+        $account = Account::find($id);
 
-        $ids = array_column($this->accounts, 'id');
-        $this->transfer->from = (string) ($ids[0] ?? '');
-        $this->transfer->to = (string) ($ids[1] ?? '');
+        if ($account === null) {
+            return;
+        }
 
-        $this->dispatch('open-modal', name: 'transfer');
+        $this->resetEditing();
+        $this->editingKind = 'account';
+        $this->editingId = $account->id;
+        $this->form->setAccount($account);
+
+        $this->dispatch('open-modal', name: 'account-form');
+    }
+
+    public function editCard(int $id): void
+    {
+        $card = CreditCard::find($id);
+
+        if ($card === null) {
+            return;
+        }
+
+        $this->resetEditing();
+        $this->editingKind = 'card';
+        $this->editingId = $card->id;
+        $this->form->setCard($card);
+
+        $this->dispatch('open-modal', name: 'account-form');
     }
 
     public function saveAccount(): void
     {
         $data = $this->form->validated();
 
-        if ($this->form->isCard()) {
-            $this->cards[] = ['id' => $this->nextId($this->cards)] + $data;
-        } else {
-            $this->accounts[] = ['id' => $this->nextId($this->accounts)] + $data;
+        match (true) {
+            $this->editingKind === 'account' => Account::whereKey($this->editingId)->first()?->update($data),
+            $this->editingKind === 'card' => CreditCard::whereKey($this->editingId)->first()?->update($data),
+            $this->form->isCard() => CreditCard::create($data),
+            default => Account::create($data),
+        };
+
+        $this->closeAccountForm();
+    }
+
+    public function deleteEditing(): void
+    {
+        if ($this->editingKind === 'account') {
+            $account = Account::find($this->editingId);
+
+            if ($account?->hasActivity()) {
+                $this->deleteError = 'Esta conta tem transações ou transferências. Exclua ou mova esses lançamentos antes.';
+
+                return;
+            }
+
+            $account?->delete();
         }
 
-        $this->form->clear();
-        $this->dispatch('close-modal', name: 'new-account');
+        if ($this->editingKind === 'card') {
+            $card = CreditCard::find($this->editingId);
+
+            if ($card?->transactions()->exists()) {
+                $this->deleteError = 'Este cartão tem transações. Exclua ou mova esses lançamentos antes.';
+
+                return;
+            }
+
+            $card?->delete();
+        }
+
+        $this->closeAccountForm();
+    }
+
+    public function openTransfer(): void
+    {
+        $this->transfer->setDefaults(Account::query()->orderBy('id')->pluck('id')->all());
+
+        $this->dispatch('open-modal', name: 'transfer');
     }
 
     public function saveTransfer(): void
     {
-        $data = $this->transfer->validated(array_column($this->accounts, 'balance', 'id'));
+        $balances = Account::query()->withBalance()->get()->mapWithKeys(
+            fn (Account $account) => [$account->id => $account->balance]
+        )->all();
 
-        foreach ($this->accounts as &$account) {
-            if ($account['id'] === $data['from']) {
-                $account['balance'] = round($account['balance'] - $data['amount'], 2);
-            } elseif ($account['id'] === $data['to']) {
-                $account['balance'] = round($account['balance'] + $data['amount'], 2);
-            }
-        }
+        Transfer::create($this->transfer->validated($balances));
 
-        $this->transfer->clear();
+        $this->transfer->reset();
         $this->dispatch('close-modal', name: 'transfer');
+    }
+
+    public function deleteTransfer(int $id): void
+    {
+        Transfer::whereKey($id)->delete();
     }
 
     public function render()
     {
-        $balance = array_sum(array_column($this->accounts, 'balance'));
-        $bills = array_sum(array_column($this->cards, 'bill'));
+        $accounts = Account::query()->withBalance()->orderBy('id')->get();
+        $cards = CreditCard::query()->orderBy('id')->get();
+        $bills = $cards->mapWithKeys(fn (CreditCard $card) => [$card->id => $card->currentBill()]);
+
+        $balance = round($accounts->sum('balance'), 2);
+        $billsTotal = round($bills->sum(), 2);
 
         return view('livewire.accounts', [
+            'accounts' => $accounts,
+            'cards' => $cards,
+            'bills' => $bills,
+            'transfers' => Transfer::query()
+                ->with(['fromAccount:id,name', 'toAccount:id,name'])
+                ->orderByDesc('date')->orderByDesc('id')
+                ->limit(5)
+                ->get(),
             'accountTypes' => AccountForm::TYPES,
             'totals' => [
                 'balance' => $balance,
-                'bills' => $bills,
-                'net' => $balance - $bills,
+                'bills' => $billsTotal,
+                'net' => $balance - $billsTotal,
             ],
         ]);
     }
 
-    private function nextId(array $rows): int
+    private function closeAccountForm(): void
     {
-        return max(array_column($rows, 'id') ?: [0]) + 1;
+        $this->form->clear();
+        $this->resetEditing();
+
+        $this->dispatch('close-modal', name: 'account-form');
+    }
+
+    private function resetEditing(): void
+    {
+        $this->editingKind = null;
+        $this->editingId = null;
+        $this->deleteError = null;
     }
 }

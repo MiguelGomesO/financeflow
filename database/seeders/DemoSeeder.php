@@ -8,6 +8,7 @@ use App\Models\Category;
 use App\Models\CreditCard;
 use App\Models\Goal;
 use App\Models\Transaction;
+use App\Models\Transfer;
 use Illuminate\Database\Seeder;
 
 /**
@@ -53,6 +54,12 @@ class DemoSeeder extends Seeder
             $rows = $template;
             if ($monthsAgo % 2 === 0) {
                 $rows[] = [14, 'Freelance', 'Renda', $checking, 750, false];
+            }
+
+            // Guarda parte do salário na poupança todo mês.
+            $transferDate = $month->copy()->day(6);
+            if ($transferDate->lessThanOrEqualTo($today)) {
+                Transfer::create(['from_account_id' => $checking->id, 'to_account_id' => $savings->id, 'amount' => 1500, 'date' => $transferDate->toDateString()]);
             }
 
             foreach ($rows as [$day, $description, $categoryName, $source, $amount, $varies]) {

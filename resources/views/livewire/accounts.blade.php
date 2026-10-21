@@ -11,7 +11,8 @@
             <button
                 type="button"
                 wire:click="openTransfer"
-                @disabled(count($accounts) < 2)
+                @disabled($accounts->count() < 2)
+                @if ($accounts->count() < 2) title="Cadastre ao menos duas contas" @endif
                 class="inline-flex min-h-11 items-center gap-2 rounded-xl border border-line-strong bg-white px-[18px] font-semibold text-ink hover:bg-mist disabled:cursor-not-allowed disabled:opacity-50"
             >
                 <x-icon name="transactions" class="size-[18px]" />
@@ -36,28 +37,46 @@
 
     <section class="flex flex-col gap-3.5" aria-labelledby="accounts-title">
         <h2 id="accounts-title" class="font-display text-xl font-semibold">Contas</h2>
-        <div class="grid grid-cols-[repeat(auto-fit,minmax(min(100%,260px),1fr))] gap-4">
-            @foreach ($accounts as $account)
-                <x-accounts.account-card wire:key="account-{{ $account['id'] }}" :account="$account" />
-            @endforeach
-        </div>
+        @if ($accounts->isEmpty())
+            <div class="flex flex-col items-center gap-3 rounded-[20px] border border-dashed border-line-strong bg-white px-6 py-10 text-center">
+                <p class="text-muted">Nenhuma conta cadastrada. Comece pela sua conta principal.</p>
+                <button type="button" wire:click="openCreate" class="min-h-11 rounded-xl border border-line-strong px-4 text-sm font-semibold hover:bg-mist">
+                    Adicionar conta
+                </button>
+            </div>
+        @else
+            <div class="grid grid-cols-[repeat(auto-fit,minmax(min(100%,260px),1fr))] gap-4">
+                @foreach ($accounts as $account)
+                    <x-accounts.account-card wire:key="account-{{ $account->id }}" :account="$account" />
+                @endforeach
+            </div>
+        @endif
     </section>
 
     <section class="flex flex-col gap-3.5" aria-labelledby="cards-title">
         <h2 id="cards-title" class="font-display text-xl font-semibold">Cartões de crédito</h2>
-        @if (empty($cards))
+        @if ($cards->isEmpty())
             <p class="rounded-[20px] border border-dashed border-line-strong bg-white px-6 py-8 text-center text-muted">
                 Nenhum cartão cadastrado.
             </p>
         @else
             <div class="grid grid-cols-[repeat(auto-fit,minmax(min(100%,400px),1fr))] gap-4">
                 @foreach ($cards as $card)
-                    <x-accounts.credit-card wire:key="card-{{ $card['id'] }}" :card="$card" />
+                    <x-accounts.credit-card wire:key="card-{{ $card->id }}" :card="$card" :bill="$bills[$card->id]" />
                 @endforeach
             </div>
         @endif
     </section>
 
-    <x-accounts.add-modal :types="$accountTypes" :is-card="$form->isCard()" />
+    @if ($transfers->isNotEmpty())
+        <x-accounts.transfers-list :transfers="$transfers" />
+    @endif
+
+    <x-accounts.add-modal
+        :types="$accountTypes"
+        :is-card="$form->isCard()"
+        :editing-kind="$editingKind"
+        :delete-error="$deleteError"
+    />
     <x-accounts.transfer-modal :accounts="$accounts" />
 </div>

@@ -15,10 +15,22 @@ class TransferForm extends Form
 
     public string $amount = '';
 
+    public string $date = '';
+
+    /** @param  array<int>  $accountIds */
+    public function setDefaults(array $accountIds): void
+    {
+        $this->reset();
+        $this->resetErrorBag();
+        $this->from = (string) ($accountIds[0] ?? '');
+        $this->to = (string) ($accountIds[1] ?? '');
+        $this->date = now()->toDateString();
+    }
+
     /**
-     * Valida e devolve ids e valor da transferência.
+     * Valida e devolve os atributos da transferência.
      *
-     * @param  array<int, float>  $balances  saldo de cada conta, por id
+     * @param  array<int, float>  $balances  saldo atual de cada conta, por id
      */
     public function validated(array $balances): array
     {
@@ -37,22 +49,24 @@ class TransferForm extends Form
                         $fail('Saldo insuficiente na conta de origem.');
                     }
                 }],
+                'date' => ['required', 'date_format:Y-m-d'],
             ],
             [
                 'from.required' => 'Escolha a conta de origem.',
                 'to.required' => 'Escolha a conta de destino.',
                 'to.different' => 'Escolha uma conta diferente da origem.',
                 'amount.required' => 'Informe o valor.',
+                'date.required' => 'Informe a data.',
+                'date.date_format' => 'Data inválida.',
                 '*.in' => 'Escolha uma conta da lista.',
             ],
         );
 
-        return ['from' => (int) $this->from, 'to' => (int) $this->to, 'amount' => Money::parse($this->amount)];
-    }
-
-    public function clear(): void
-    {
-        $this->reset();
-        $this->resetErrorBag();
+        return [
+            'from_account_id' => (int) $this->from,
+            'to_account_id' => (int) $this->to,
+            'amount' => Money::parse($this->amount),
+            'date' => $this->date,
+        ];
     }
 }

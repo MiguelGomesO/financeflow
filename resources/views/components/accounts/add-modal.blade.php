@@ -1,8 +1,19 @@
-@props(['types', 'isCard' => false])
+@props(['types', 'isCard' => false, 'editingKind' => null, 'deleteError' => null])
 
-<x-ui.modal name="new-account" title="Adicionar conta">
+@php
+    $editing = $editingKind !== null;
+    $title = match ($editingKind) {
+        'account' => 'Editar conta',
+        'card' => 'Editar cartão',
+        default => 'Adicionar conta',
+    };
+@endphp
+
+<x-ui.modal name="account-form" :title="$title">
     <form wire:submit="saveAccount" class="flex flex-col gap-4">
-        <x-ui.segmented label="O que adicionar" model="form.kind" :options="['account' => 'Conta', 'card' => 'Cartão de crédito']" live />
+        @unless ($editing)
+            <x-ui.segmented label="O que adicionar" model="form.kind" :options="['account' => 'Conta', 'card' => 'Cartão de crédito']" live />
+        @endunless
 
         <x-ui.field label="Nome" for="account-name" error="form.name">
             <input
@@ -44,13 +55,21 @@
                     </select>
                 </x-ui.field>
 
-                <x-ui.field label="Saldo atual (R$)" for="account-balance" error="form.balance">
+                <x-ui.field :label="$editing ? 'Saldo inicial (R$)' : 'Saldo atual (R$)'" for="account-balance" error="form.balance">
                     <input id="account-balance" type="text" inputmode="decimal" wire:model="form.balance" placeholder="0,00" class="input">
                 </x-ui.field>
             </div>
 
+            @if ($editing)
+                <p class="-mt-2 text-[13px] text-muted">O saldo inicial é o valor antes das transações registradas no app.</p>
+            @endif
+
             <x-ui.field label="Banco ou instituição (opcional)" for="account-institution" error="form.institution">
                 <input id="account-institution" type="text" wire:model="form.institution" maxlength="40" class="input">
+            </x-ui.field>
+
+            <x-ui.field label="Observação (opcional)" for="account-note" error="form.note">
+                <input id="account-note" type="text" wire:model="form.note" maxlength="120" placeholder="Ex.: Recebe o salário" class="input">
             </x-ui.field>
         @endif
 
@@ -60,7 +79,26 @@
             wire:loading.attr="disabled"
             wire:target="saveAccount"
         >
-            {{ $isCard ? 'Adicionar cartão' : 'Adicionar conta' }}
+            @if ($editing)
+                Salvar alterações
+            @else
+                {{ $isCard ? 'Adicionar cartão' : 'Adicionar conta' }}
+            @endif
         </button>
+
+        @if ($editing)
+            @if ($deleteError)
+                <p role="alert" class="rounded-xl bg-expense-light px-3.5 py-2.5 text-sm text-expense-dark">{{ $deleteError }}</p>
+            @endif
+
+            <button
+                type="button"
+                wire:click="deleteEditing"
+                wire:confirm="{{ $editingKind === 'card' ? 'Excluir este cartão?' : 'Excluir esta conta?' }}"
+                class="min-h-11 rounded-xl text-sm font-semibold text-expense-dark hover:bg-expense-light"
+            >
+                {{ $editingKind === 'card' ? 'Excluir cartão' : 'Excluir conta' }}
+            </button>
+        @endif
     </form>
 </x-ui.modal>

@@ -2,12 +2,14 @@
 
 namespace App\Livewire\Forms;
 
+use App\Models\Account;
+use App\Models\CreditCard;
 use App\Support\Money;
 use Closure;
 use Illuminate\Validation\Rule;
 use Livewire\Form;
 
-/** Cadastro de uma conta ou de um cartão de crédito. */
+/** Cadastro e edição de uma conta ou de um cartão de crédito. */
 class AccountForm extends Form
 {
     public const TYPES = ['Conta corrente', 'Poupança', 'Carteira', 'Investimentos'];
@@ -21,6 +23,8 @@ class AccountForm extends Form
     public string $type = 'Conta corrente';
 
     public string $institution = '';
+
+    public string $note = '';
 
     public string $balance = '';
 
@@ -38,7 +42,29 @@ class AccountForm extends Form
         return $this->kind === 'card';
     }
 
-    /** Valida e devolve os campos do tipo escolhido. */
+    public function setAccount(Account $account): void
+    {
+        $this->clear();
+        $this->kind = 'account';
+        $this->name = $account->name;
+        $this->type = $account->type;
+        $this->institution = (string) $account->institution;
+        $this->note = (string) $account->note;
+        $this->balance = number_format($account->opening_balance, 2, ',', '.');
+    }
+
+    public function setCard(CreditCard $card): void
+    {
+        $this->clear();
+        $this->kind = 'card';
+        $this->name = $card->name;
+        $this->last4 = $card->last4;
+        $this->limit = number_format($card->limit, 2, ',', '.');
+        $this->closeDay = (string) $card->close_day;
+        $this->dueDay = (string) $card->due_day;
+    }
+
+    /** Valida e devolve os atributos do model do tipo escolhido. */
     public function validated(): array
     {
         $rules = [
@@ -61,6 +87,7 @@ class AccountForm extends Form
             $rules += [
                 'type' => ['required', Rule::in(self::TYPES)],
                 'institution' => ['nullable', 'string', 'max:40'],
+                'note' => ['nullable', 'string', 'max:120'],
                 'balance' => ['nullable', 'regex:/^[\d.,\s]*$/'],
             ];
         }
@@ -76,13 +103,13 @@ class AccountForm extends Form
             '*.between' => 'Use um dia entre 1 e 31.',
             'balance.regex' => 'Valor inválido.',
             'type.in' => 'Escolha um tipo da lista.',
+            'note.max' => 'Use no máximo 120 caracteres.',
         ]);
 
         if ($this->isCard()) {
             return [
                 'name' => trim($this->name),
                 'last4' => $this->last4,
-                'bill' => 0,
                 'limit' => Money::parse($this->limit),
                 'close_day' => (int) $this->closeDay,
                 'due_day' => (int) $this->dueDay,
@@ -92,9 +119,9 @@ class AccountForm extends Form
         return [
             'name' => trim($this->name),
             'type' => $this->type,
-            'institution' => trim($this->institution) ?: $this->type,
-            'balance' => Money::parse($this->balance),
-            'note' => null,
+            'institution' => trim($this->institution) ?: null,
+            'note' => trim($this->note) ?: null,
+            'opening_balance' => Money::parse($this->balance),
         ];
     }
 
