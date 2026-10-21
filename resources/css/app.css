@@ -1,0 +1,52 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+@source '../../app/**/*.php';
+
+@theme {
+    --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --font-display: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+
+    /* Base escura (sidebar, cards de destaque) */
+    --color-ink: #13201c;
+    --color-ink-800: #1c2c27;
+    --color-ink-700: #23352f;
+    --color-ink-600: #2e4a41;
+    --color-on-ink: #d4ddd9;
+    --color-on-ink-muted: #a9b8b1;
+
+    /* Superfícies e texto */
+    --color-canvas: #f6f7f4;
+    --color-mist: #edf0ee;
+    --color-line: #e2e7e4;
+    --color-line-strong: #d5dbd7;
+    --color-soft: #3e4a45;
+    --color-body: #4a5651;
+    --color-muted: #5b6661;
+
+    /* Entradas / marca */
+    --color-brand: #0e7c5a;
+    --color-brand-dark: #0a5c43;
+    --color-brand-light: #dff3ea;
+    --color-mint: #5ee0a8;
+
+    /* Saídas / alertas */
+    --color-expense: #c2410c;
+    --color-expense-dark: #9a3412;
+    --color-expense-soft: #f59e5b;
+    --color-expense-light: #fde8da;
+    --color-expense-on-ink: #ffa066;
+}
+
+[x-cloak] {
+    display: none !important;
+}
+
+@layer components {
+    .input {
+        @apply min-h-11 w-full rounded-xl border border-line-strong bg-white px-3.5 text-ink placeholder:text-muted focus:border-brand focus:ring-2 focus:ring-brand/20 focus:outline-none;
+    }
+}
