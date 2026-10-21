@@ -2,8 +2,8 @@
 
 namespace Tests\Feature;
 
-use App\Livewire\Forms\TransactionForm;
 use App\Livewire\Transactions;
+use App\Support\Money;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -69,9 +69,9 @@ class TransactionsTest extends TestCase
 
     public function test_parses_brazilian_amounts(): void
     {
-        $this->assertSame(1234.56, TransactionForm::parseAmount('1.234,56'));
-        $this->assertSame(25.9, TransactionForm::parseAmount('25,90'));
-        $this->assertSame(12.5, TransactionForm::parseAmount('12.50'));
-        $this->assertSame(0.0, TransactionForm::parseAmount('abc'));
+        $this->assertSame(1234.56, Money::parse('1.234,56'));
+        $this->assertSame(25.9, Money::parse('25,90'));
+        $this->assertSame(12.5, Money::parse('12.50'));
+        $this->assertSame(0.0, Money::parse('abc'));
     }
 }

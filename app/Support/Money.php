@@ -18,4 +18,16 @@ class Money
 
         return ($value < 0 ? '− ' : '+ ').$formatted;
     }
+
+    /** Lê um valor digitado: aceita "1.234,56", "1234,56" e "1234.56". */
+    public static function parse(string $value): float
+    {
+        $value = preg_replace('/[^\d.,]/', '', $value);
+
+        if (str_contains($value, ',')) {
+            $value = str_replace(['.', ','], ['', '.'], $value);
+        }
+
+        return is_numeric($value) ? round((float) $value, 2) : 0.0;
+    }
 }

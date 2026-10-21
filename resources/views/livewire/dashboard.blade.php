@@ -17,7 +17,7 @@
 
             <button
                 type="button"
-                x-on:click="$dispatch('open-new-transaction')"
+                x-on:click="$dispatch('open-modal', { name: 'new-transaction' })"
                 class="inline-flex min-h-11 items-center gap-2 rounded-xl bg-brand px-[18px] font-semibold text-white hover:bg-brand-dark"
             >
                 <x-icon name="plus" stroke-width="2.4" class="size-[18px]" />

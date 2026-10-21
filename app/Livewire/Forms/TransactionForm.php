@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Forms;
 
+use App\Support\Money;
 use App\Support\SampleData;
 use Closure;
 use Illuminate\Validation\Rule;
@@ -28,7 +29,7 @@ class TransactionForm extends Form
             'type' => ['required', Rule::in(['income', 'expense'])],
             'description' => ['required', 'string', 'max:120'],
             'amount' => ['required', function (string $attribute, mixed $value, Closure $fail) {
-                if (self::parseAmount((string) $value) <= 0) {
+                if (Money::parse((string) $value) <= 0) {
                     $fail('Informe um valor maior que zero, ex.: 25,90.');
                 }
             }],
@@ -55,7 +56,7 @@ class TransactionForm extends Form
     {
         $this->validate();
 
-        $amount = self::parseAmount($this->amount);
+        $amount = Money::parse($this->amount);
 
         return [
             'id' => $id,
@@ -71,17 +72,5 @@ class TransactionForm extends Form
     {
         $this->reset('description', 'amount');
         $this->resetErrorBag();
-    }
-
-    /** Aceita "1.234,56", "1234,56" e "1234.56". */
-    public static function parseAmount(string $value): float
-    {
-        $value = preg_replace('/[^\d.,]/', '', $value);
-
-        if (str_contains($value, ',')) {
-            $value = str_replace(['.', ','], ['', '.'], $value);
-        }
-
-        return is_numeric($value) ? round((float) $value, 2) : 0.0;
     }
 }

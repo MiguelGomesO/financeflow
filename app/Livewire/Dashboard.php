@@ -113,13 +113,7 @@ class Dashboard extends Component
 
     private function budgets(): array
     {
-        return [
-            ['name' => 'Mercado', 'spent' => 1120, 'limit' => 1400],
-            ['name' => 'Moradia', 'spent' => 1972, 'limit' => 2000],
-            ['name' => 'Transporte', 'spent' => 410, 'limit' => 600],
-            ['name' => 'Lazer', 'spent' => 520, 'limit' => 450],
-            ['name' => 'Saúde', 'spent' => 180, 'limit' => 400],
-        ];
+        return array_slice(SampleData::budgets()[SampleData::currentMonth()], 0, 5);
     }
 
     private function recentTransactions(): array
