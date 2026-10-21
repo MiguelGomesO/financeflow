@@ -49,4 +49,5 @@
     </div>
 
     <livewire:create-transaction />
+    <livewire:edit-transaction />
 </div>

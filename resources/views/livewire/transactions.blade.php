@@ -4,13 +4,22 @@
     <div class="flex flex-wrap items-center justify-between gap-4">
         <div>
             <h1 class="font-display text-[30px] font-semibold tracking-tight">Transações</h1>
-            <p class="text-muted">Outubro de 2026</p>
+            <p class="text-muted">Entradas e saídas do mês</p>
         </div>
 
-        <div class="flex flex-wrap gap-2.5">
+        <div class="flex flex-wrap items-center gap-2.5">
+            <label for="month" class="text-sm text-muted">Mês</label>
+            <select id="month" wire:model.live="month" class="input w-auto">
+                @foreach ($months as $value => $label)
+                    <option value="{{ $value }}">{{ $label }}</option>
+                @endforeach
+            </select>
+
             <button
                 type="button"
-                class="inline-flex min-h-11 items-center gap-2 rounded-xl border border-line-strong bg-white px-[18px] font-semibold text-ink hover:bg-mist"
+                disabled
+                title="Em breve"
+                class="inline-flex min-h-11 cursor-not-allowed items-center gap-2 rounded-xl border border-line-strong bg-white px-[18px] font-semibold text-ink opacity-60"
             >
                 <x-icon name="download" class="size-[18px]" />
                 Importar extrato
@@ -39,6 +48,8 @@
             <x-transactions.table :rows="$rows" :has-filters="$hasFilters" />
         </x-ui.card>
 
-        <x-transactions.form :categories="$categories" :accounts="$accounts" />
+        <livewire:create-transaction inline />
     </div>
+
+    <livewire:edit-transaction />
 </div>

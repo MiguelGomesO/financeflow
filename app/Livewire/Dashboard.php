@@ -38,8 +38,8 @@ class Dashboard extends Component
         $this->normalizePeriod();
     }
 
-    /** Recarrega os números quando uma transação é criada no modal. */
-    #[On('transaction-created')]
+    /** Recarrega os números quando uma transação é criada, editada ou excluída. */
+    #[On('transactions-changed')]
     public function refreshData(): void {}
 
     public function render()

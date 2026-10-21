@@ -16,7 +16,16 @@
             <tbody>
                 @forelse ($transactions as $transaction)
                     <tr wire:key="tx-{{ $transaction['id'] }}" class="border-t border-mist">
-                        <td class="px-2 py-3 font-medium">{{ $transaction['description'] }}</td>
+                        <td class="px-2 py-1.5">
+                            <button
+                                type="button"
+                                x-on:click="$dispatch('edit-transaction', { id: {{ $transaction['id'] }} })"
+                                class="-mx-1.5 min-h-9 rounded-lg px-1.5 text-left font-medium hover:bg-mist hover:underline"
+                                aria-label="Editar {{ $transaction['description'] }}"
+                            >
+                                {{ $transaction['description'] }}
+                            </button>
+                        </td>
                         <td class="px-2 py-3">
                             <span class="rounded-full bg-mist px-2.5 py-0.5 text-[13px] text-soft">{{ $transaction['category'] }}</span>
                         </td>

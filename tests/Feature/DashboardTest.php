@@ -146,15 +146,15 @@ class DashboardTest extends TestCase
         $category = Category::where('name', 'Mercado')->firstOrFail();
 
         Livewire::test(CreateTransaction::class)
-            ->assertSet('source', "account:{$account->id}")
-            ->set('description', 'Feira da semana')
-            ->set('amount', '1.234,50')
-            ->set('categoryId', (string) $category->id)
+            ->assertSet('form.source', "account:{$account->id}")
+            ->set('form.description', 'Feira da semana')
+            ->set('form.amount', '1.234,50')
+            ->set('form.categoryId', (string) $category->id)
             ->call('save')
             ->assertHasNoErrors()
-            ->assertDispatched('transaction-created')
+            ->assertDispatched('transactions-changed')
             ->assertDispatched('close-modal', name: 'new-transaction')
-            ->assertSet('description', '');
+            ->assertSet('form.description', '');
 
         $this->assertDatabaseHas('transactions', [
             'description' => 'Feira da semana',
@@ -173,9 +173,9 @@ class DashboardTest extends TestCase
         $card = CreditCard::factory()->create();
 
         Livewire::test(CreateTransaction::class)
-            ->set('description', 'Livro')
-            ->set('amount', '80')
-            ->set('source', "card:{$card->id}")
+            ->set('form.description', 'Livro')
+            ->set('form.amount', '80')
+            ->set('form.source', "card:{$card->id}")
             ->call('save')
             ->assertHasNoErrors();
 
@@ -189,13 +189,13 @@ class DashboardTest extends TestCase
         $income = Category::where('name', 'Renda')->firstOrFail();
 
         Livewire::test(CreateTransaction::class)
-            ->set('type', 'income')
-            ->assertSet('categoryId', (string) $income->id)
-            ->set('description', 'Salário')
-            ->set('amount', '5000')
-            ->set('source', "card:{$card->id}")
+            ->set('form.type', 'income')
+            ->assertSet('form.categoryId', (string) $income->id)
+            ->set('form.description', 'Salário')
+            ->set('form.amount', '5000')
+            ->set('form.source', "card:{$card->id}")
             ->call('save')
-            ->assertHasErrors(['source']);
+            ->assertHasErrors(['form.source']);
     }
 
     public function test_validates_the_new_transaction(): void
@@ -204,12 +204,12 @@ class DashboardTest extends TestCase
         $expenseCategory = Category::where('name', 'Mercado')->firstOrFail();
 
         Livewire::test(CreateTransaction::class)
-            ->set('type', 'income')
-            ->set('categoryId', (string) $expenseCategory->id)
-            ->set('description', '')
-            ->set('amount', '0')
+            ->set('form.type', 'income')
+            ->set('form.categoryId', (string) $expenseCategory->id)
+            ->set('form.description', '')
+            ->set('form.amount', '0')
             ->call('save')
-            ->assertHasErrors(['description', 'amount', 'categoryId']);
+            ->assertHasErrors(['form.description', 'form.amount', 'form.categoryId']);
 
         $this->assertDatabaseCount('transactions', 0);
     }

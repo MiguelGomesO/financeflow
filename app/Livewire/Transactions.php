@@ -2,22 +2,31 @@
 
 namespace App\Livewire;
 
-use App\Livewire\Forms\TransactionForm;
-use App\Support\SampleData;
+use App\Models\Category;
+use App\Models\Transaction;
+use App\Support\Dates;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Carbon;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 #[Title('Transações · FinanceFlow')]
 class Transactions extends Component
 {
+    use WithPagination;
+
     public const TYPES = [
         'all' => 'Todas',
         'income' => 'Entradas',
         'expense' => 'Saídas',
     ];
 
-    public TransactionForm $form;
+    /** Mês exibido, "Y-m". */
+    #[Url(except: '')]
+    public string $month = '';
 
     #[Url(except: '')]
     public string $search = '';
@@ -25,52 +34,48 @@ class Transactions extends Component
     #[Url(except: 'all')]
     public string $type = 'all';
 
+    /** Id da categoria ('' = todas). */
     #[Url(except: '')]
     public string $category = '';
 
-    /** Por enquanto a lista vive no estado do componente (sem banco). */
-    public array $transactions = [];
-
     public function mount(): void
     {
-        $this->transactions = SampleData::transactions();
-        $this->form->date = now()->toDateString();
         $this->normalizeFilters();
     }
 
     public function updated(string $property): void
     {
-        if (in_array($property, ['type', 'category'], true)) {
+        if (in_array($property, ['month', 'search', 'type', 'category'], true)) {
             $this->normalizeFilters();
+            $this->resetPage();
         }
-    }
-
-    public function save(): void
-    {
-        $nextId = max(array_column($this->transactions, 'id') ?: [0]) + 1;
-
-        $this->transactions[] = $this->form->toTransaction($nextId);
-        $this->form->clear();
-
-        $this->dispatch('transaction-saved');
     }
 
     public function clearFilters(): void
     {
         $this->reset('search', 'type', 'category');
+        $this->resetPage();
     }
+
+    /** Recarrega a lista quando uma transação é criada, editada ou excluída. */
+    #[On('transactions-changed')]
+    public function refreshList(): void {}
 
     public function render()
     {
-        $filtered = $this->filtered();
-        $income = array_sum(array_filter(array_column($filtered, 'amount'), fn ($v) => $v > 0));
-        $expense = abs(array_sum(array_filter(array_column($filtered, 'amount'), fn ($v) => $v < 0)));
+        $filtered = $this->filteredQuery();
+
+        $income = (float) (clone $filtered)->where('amount', '>', 0)->sum('amount');
+        $expense = (float) -(clone $filtered)->where('amount', '<', 0)->sum('amount');
 
         return view('livewire.transactions', [
-            'rows' => $filtered,
+            'rows' => (clone $filtered)
+                ->with(['category:id,name', 'account:id,name', 'creditCard:id,name'])
+                ->latestFirst()
+                ->paginate(20),
+            'months' => $this->monthOptions(),
             'types' => self::TYPES,
-            'categories' => SampleData::CATEGORIES,
-            'accounts' => SampleData::ACCOUNTS,
+            'categories' => Category::query()->orderBy('name')->get(['id', 'name']),
             'hasFilters' => $this->search !== '' || $this->type !== 'all' || $this->category !== '',
             'totals' => [
                 'income' => $income,
@@ -80,29 +85,48 @@ class Transactions extends Component
         ]);
     }
 
-    private function filtered(): array
+    private function filteredQuery(): Builder
     {
-        $search = mb_strtolower(trim($this->search));
+        $start = Carbon::createFromFormat('!Y-m', $this->month);
+        $search = trim($this->search);
 
-        return collect($this->transactions)
-            ->when($search !== '', fn ($c) => $c->filter(
-                fn (array $t) => str_contains(mb_strtolower($t['description']), $search)
-            ))
-            ->when($this->type === 'income', fn ($c) => $c->filter(fn (array $t) => $t['amount'] > 0))
-            ->when($this->type === 'expense', fn ($c) => $c->filter(fn (array $t) => $t['amount'] < 0))
-            ->when($this->category !== '', fn ($c) => $c->where('category', $this->category))
-            ->sortBy([['date', 'desc'], ['id', 'desc']])
-            ->values()
-            ->all();
+        return Transaction::query()
+            ->betweenDates($start, $start->copy()->endOfMonth())
+            ->when($search !== '', fn (Builder $q) => $q->where('description', 'like', '%'.addcslashes($search, '%_\\').'%'))
+            ->when($this->type === 'income', fn (Builder $q) => $q->where('amount', '>', 0))
+            ->when($this->type === 'expense', fn (Builder $q) => $q->where('amount', '<', 0))
+            ->when($this->category !== '', fn (Builder $q) => $q->where('category_id', (int) $this->category));
+    }
+
+    /** Do mês da transação mais antiga até o mês atual, mais recente primeiro. */
+    private function monthOptions(): array
+    {
+        $current = now()->startOfMonth();
+        $oldest = Transaction::query()->min('date');
+        $first = $oldest ? Carbon::parse($oldest)->startOfMonth() : $current->copy();
+
+        // Um mês futuro escolhido pela URL continua aparecendo na lista.
+        $last = Carbon::createFromFormat('!Y-m', $this->month)->max($current);
+
+        $options = [];
+        for ($month = $last->copy(); $month->greaterThanOrEqualTo($first->min($last)); $month->subMonth()) {
+            $options[$month->format('Y-m')] = Dates::monthLabel($month->format('Y-m'));
+        }
+
+        return $options;
     }
 
     private function normalizeFilters(): void
     {
+        if (! preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $this->month)) {
+            $this->month = now()->format('Y-m');
+        }
+
         if (! array_key_exists($this->type, self::TYPES)) {
             $this->type = 'all';
         }
 
-        if ($this->category !== '' && ! in_array($this->category, SampleData::CATEGORIES, true)) {
+        if ($this->category !== '' && ! Category::whereKey((int) $this->category)->exists()) {
             $this->category = '';
         }
     }

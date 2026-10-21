@@ -19,7 +19,7 @@
     <select id="category" wire:model.live="category" class="input w-auto">
         <option value="">Todas as categorias</option>
         @foreach ($categories as $category)
-            <option value="{{ $category }}">{{ $category }}</option>
+            <option value="{{ $category->id }}">{{ $category->name }}</option>
         @endforeach
     </select>
 

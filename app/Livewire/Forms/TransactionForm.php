@@ -2,26 +2,104 @@
 
 namespace App\Livewire\Forms;
 
+use App\Models\Account;
+use App\Models\Category;
+use App\Models\CreditCard;
+use App\Models\Transaction;
 use App\Support\Money;
-use App\Support\SampleData;
 use Closure;
 use Illuminate\Validation\Rule;
 use Livewire\Form;
 
+/** Campos de uma transação, usados ao criar e ao editar. */
 class TransactionForm extends Form
 {
     public string $type = 'expense';
 
     public string $description = '';
 
-    /** Texto digitado pelo usuário, ex.: "1.234,56". */
+    /** Texto digitado, ex.: "1.234,56". */
     public string $amount = '';
 
-    public string $category = 'Mercado';
+    public string $categoryId = '';
 
-    public string $account = 'Conta corrente';
+    /** "account:{id}" ou "card:{id}". */
+    public string $source = '';
 
     public string $date = '';
+
+    public function setDefaults(): void
+    {
+        $this->reset();
+        $this->date = now()->toDateString();
+        $this->source = $this->firstAccountSource();
+        $this->categoryId = $this->firstCategoryId();
+        $this->resetErrorBag();
+    }
+
+    public function setTransaction(Transaction $transaction): void
+    {
+        $this->type = $transaction->amount > 0 ? 'income' : 'expense';
+        $this->description = $transaction->description;
+        $this->amount = number_format(abs($transaction->amount), 2, ',', '.');
+        $this->categoryId = (string) $transaction->category_id;
+        $this->source = $transaction->account_id
+            ? "account:{$transaction->account_id}"
+            : "card:{$transaction->credit_card_id}";
+        $this->date = $transaction->date->toDateString();
+        $this->resetErrorBag();
+    }
+
+    /** Ao trocar o tipo: categoria do tipo novo e, para receita, uma conta (nunca cartão). */
+    public function syncWithType(): void
+    {
+        $categoryMatches = $this->categoryId !== '' && Category::query()
+            ->whereKey($this->categoryId)->ofType($this->type)->exists();
+
+        if (! $categoryMatches) {
+            $this->categoryId = $this->firstCategoryId();
+        }
+
+        if ($this->type === 'income' && str_starts_with($this->source, 'card:')) {
+            $this->source = $this->firstAccountSource();
+        }
+    }
+
+    /** Valida e devolve os atributos do model. */
+    public function attributes(): array
+    {
+        $this->validate();
+
+        [$sourceType, $sourceId] = explode(':', $this->source);
+        $amount = Money::parse($this->amount);
+
+        return [
+            'description' => trim($this->description),
+            'amount' => $this->type === 'income' ? $amount : -$amount,
+            'date' => $this->date,
+            'category_id' => (int) $this->categoryId,
+            'account_id' => $sourceType === 'account' ? (int) $sourceId : null,
+            'credit_card_id' => $sourceType === 'card' ? (int) $sourceId : null,
+        ];
+    }
+
+    /** Opções dos selects para o tipo atual. */
+    public function options(): array
+    {
+        return [
+            'categories' => Category::query()->ofType($this->type)->orderBy('name')->get(['id', 'name']),
+            'accounts' => Account::query()->orderBy('name')->get(['id', 'name']),
+            'cards' => $this->type === 'expense'
+                ? CreditCard::query()->orderBy('name')->get(['id', 'name'])
+                : collect(),
+        ];
+    }
+
+    public function clearInputs(): void
+    {
+        $this->reset('description', 'amount');
+        $this->resetErrorBag();
+    }
 
     protected function rules(): array
     {
@@ -33,8 +111,22 @@ class TransactionForm extends Form
                     $fail('Informe um valor maior que zero, ex.: 25,90.');
                 }
             }],
-            'category' => ['required', Rule::in(SampleData::CATEGORIES)],
-            'account' => ['required', Rule::in(SampleData::ACCOUNTS)],
+            'categoryId' => ['required', Rule::exists('categories', 'id')->where('type', $this->type)],
+            'source' => ['required', function (string $attribute, mixed $value, Closure $fail) {
+                if (! preg_match('/^(account|card):(\d+)$/', (string) $value, $m)) {
+                    $fail('Escolha uma conta ou cartão.');
+
+                    return;
+                }
+
+                if ($m[1] === 'card' && $this->type === 'income') {
+                    $fail('Receitas entram numa conta, não num cartão.');
+                } elseif ($m[1] === 'account' && ! Account::whereKey($m[2])->exists()) {
+                    $fail('Conta não encontrada.');
+                } elseif ($m[1] === 'card' && ! CreditCard::whereKey($m[2])->exists()) {
+                    $fail('Cartão não encontrado.');
+                }
+            }],
             'date' => ['required', 'date_format:Y-m-d'],
         ];
     }
@@ -45,32 +137,23 @@ class TransactionForm extends Form
             'description.required' => 'Descreva a transação.',
             'description.max' => 'Use no máximo 120 caracteres.',
             'amount.required' => 'Informe o valor.',
+            'categoryId.required' => 'Escolha uma categoria.',
+            'categoryId.exists' => 'Escolha uma categoria da lista.',
+            'source.required' => 'Escolha uma conta ou cartão.',
             'date.required' => 'Informe a data.',
             'date.date_format' => 'Data inválida.',
-            '*.in' => 'Escolha uma opção da lista.',
         ];
     }
 
-    /** Valida e devolve a transação pronta para entrar na lista. */
-    public function toTransaction(int $id): array
+    private function firstAccountSource(): string
     {
-        $this->validate();
+        $id = Account::query()->orderBy('id')->value('id');
 
-        $amount = Money::parse($this->amount);
-
-        return [
-            'id' => $id,
-            'description' => trim($this->description),
-            'category' => $this->category,
-            'account' => $this->account,
-            'date' => $this->date,
-            'amount' => $this->type === 'income' ? $amount : -$amount,
-        ];
+        return $id ? "account:{$id}" : '';
     }
 
-    public function clear(): void
+    private function firstCategoryId(): string
     {
-        $this->reset('description', 'amount');
-        $this->resetErrorBag();
+        return (string) (Category::query()->ofType($this->type)->orderBy('name')->value('id') ?? '');
     }
 }
