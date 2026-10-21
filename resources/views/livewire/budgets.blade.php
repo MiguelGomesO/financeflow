@@ -15,7 +15,7 @@
 
             <button
                 type="button"
-                x-on:click="$dispatch('open-modal', { name: 'new-budget' })"
+                wire:click="openCreate"
                 class="inline-flex min-h-11 items-center gap-2 rounded-xl bg-brand px-[18px] font-semibold text-white hover:bg-brand-dark"
             >
                 <x-icon name="plus" stroke-width="2.4" class="size-[18px]" />
@@ -24,28 +24,39 @@
         </div>
     </div>
 
-    <div class="flex flex-col gap-6" wire:loading.class="opacity-60" wire:target="month">
+    <div class="flex flex-col gap-6" wire:loading.class="opacity-60" wire:target="month,copyPrevious">
         <x-budgets.summary :totals="$totals" :pace="$pace" />
 
-        @if (empty($items))
+        @if ($items->isEmpty())
             <div class="flex flex-col items-center gap-3 rounded-[20px] border border-dashed border-line-strong bg-white px-6 py-12 text-center">
                 <p class="text-muted">Nenhum orçamento definido para este mês.</p>
-                <button
-                    type="button"
-                    x-on:click="$dispatch('open-modal', { name: 'new-budget' })"
-                    class="min-h-11 rounded-xl border border-line-strong px-4 text-sm font-semibold hover:bg-mist"
-                >
-                    Criar o primeiro
-                </button>
+                <div class="flex flex-wrap justify-center gap-2.5">
+                    @if ($canCopyPrevious)
+                        <button
+                            type="button"
+                            wire:click="copyPrevious"
+                            class="min-h-11 rounded-xl bg-brand px-4 text-sm font-semibold text-white hover:bg-brand-dark"
+                        >
+                            Copiar limites de {{ $previousLabel }}
+                        </button>
+                    @endif
+                    <button
+                        type="button"
+                        wire:click="openCreate"
+                        class="min-h-11 rounded-xl border border-line-strong px-4 text-sm font-semibold hover:bg-mist"
+                    >
+                        Criar um orçamento
+                    </button>
+                </div>
             </div>
         @else
             <div class="grid grid-cols-[repeat(auto-fill,minmax(min(100%,300px),1fr))] gap-4">
                 @foreach ($items as $budget)
-                    <x-budgets.card wire:key="budget-{{ $month }}-{{ $budget['name'] }}" :budget="$budget" :pace="$pace" />
+                    <x-budgets.card wire:key="budget-{{ $budget->id }}" :budget="$budget" :pace="$pace" />
                 @endforeach
             </div>
         @endif
     </div>
 
-    <x-budgets.create-form :available="$available" />
+    <x-budgets.form-modal :available="$available" :editing-name="$editingName" />
 </div>

@@ -4,8 +4,11 @@ namespace App\Livewire;
 
 use App\Livewire\Forms\DepositForm;
 use App\Livewire\Forms\GoalForm;
+use App\Models\Account;
+use App\Models\Goal;
+use App\Models\GoalDeposit;
 use App\Support\GoalProgress;
-use App\Support\SampleData;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
@@ -16,41 +19,29 @@ class Goals extends Component
 
     public DepositForm $deposit;
 
-    /** Por enquanto metas e depósitos vivem no estado do componente (sem banco). */
-    public array $goals = [];
-
-    public array $deposits = [];
-
     /** Meta aberta no modal de edição (null = criando uma nova). */
     public ?int $editingId = null;
 
     /** Meta que vai receber o depósito. */
     public ?int $depositGoalId = null;
 
-    public function mount(): void
-    {
-        $this->goals = SampleData::goals();
-        $this->deposits = SampleData::goalDeposits();
-    }
-
     public function create(): void
     {
         $this->editingId = null;
-        $this->form->clear();
-        $this->form->due = SampleData::today()->addYear()->format('Y-m');
+        $this->form->setDefaults();
 
         $this->dispatch('open-modal', name: 'goal-form');
     }
 
     public function edit(int $id): void
     {
-        $goal = $this->findGoal($id);
+        $goal = Goal::find($id);
 
         if ($goal === null) {
             return;
         }
 
-        $this->editingId = $id;
+        $this->editingId = $goal->id;
         $this->form->setGoal($goal);
 
         $this->dispatch('open-modal', name: 'goal-form');
@@ -58,92 +49,118 @@ class Goals extends Component
 
     public function saveGoal(): void
     {
-        if ($this->editingId === null) {
-            $this->goals[] = ['id' => $this->nextId($this->goals)] + $this->form->validated(creating: true);
-        } else {
-            $index = $this->goalIndex($this->editingId);
-            $this->goals[$index] = array_merge($this->goals[$index], $this->form->validated(creating: false));
-        }
+        $creating = $this->editingId === null;
+        $data = $this->form->validated($creating);
+        $initial = $data['initial'];
+        unset($data['initial']);
+
+        DB::transaction(function () use ($creating, $data, $initial) {
+            if (! $creating) {
+                Goal::whereKey($this->editingId)->first()?->update($data);
+
+                return;
+            }
+
+            $goal = Goal::create($data);
+
+            if ($initial > 0) {
+                $goal->deposits()->create(['amount' => $initial, 'date' => now()->toDateString()]);
+            }
+        });
 
         $this->closeGoalForm();
     }
 
+    /** Exclui a meta; os depósitos dela saem junto (cascade). */
     public function deleteGoal(): void
     {
-        $id = $this->editingId;
-
-        $this->goals = array_values(array_filter($this->goals, fn (array $g) => $g['id'] !== $id));
-        $this->deposits = array_values(array_filter($this->deposits, fn (array $d) => $d['goal_id'] !== $id));
+        Goal::whereKey($this->editingId)->delete();
 
         $this->closeGoalForm();
     }
 
     public function startDeposit(int $id): void
     {
-        if ($this->findGoal($id) === null) {
+        if (! Goal::whereKey($id)->exists()) {
             return;
         }
 
         $this->depositGoalId = $id;
-        $this->deposit->clear();
+        $this->deposit->setDefaults(
+            GoalDeposit::query()->whereNotNull('account_id')->latest('id')->value('account_id')
+                ?? Account::query()->orderBy('id')->value('id')
+        );
 
         $this->dispatch('open-modal', name: 'deposit');
     }
 
     public function saveDeposit(): void
     {
-        $index = $this->goalIndex($this->depositGoalId);
+        $goal = Goal::find($this->depositGoalId);
 
-        if ($index === null) {
+        if ($goal === null) {
             return;
         }
 
-        $data = $this->deposit->validated();
+        $goal->deposits()->create($this->deposit->validated());
 
-        $this->goals[$index]['saved'] += $data['amount'];
-
-        array_unshift($this->deposits, [
-            'id' => $this->nextId($this->deposits),
-            'goal_id' => $this->depositGoalId,
-            'date' => SampleData::TODAY,
-            'account' => $data['account'],
-            'amount' => $data['amount'],
-        ]);
-
-        $this->deposit->clear();
         $this->depositGoalId = null;
+        $this->deposit->reset();
 
         $this->dispatch('close-modal', name: 'deposit');
     }
 
+    public function deleteDeposit(int $id): void
+    {
+        GoalDeposit::whereKey($id)->delete();
+    }
+
     public function render()
     {
-        $currentMonth = SampleData::currentMonth();
+        $currentMonth = now()->format('Y-m');
 
-        $goals = array_map(
-            fn (array $goal) => $goal + ['progress' => GoalProgress::for($goal, $currentMonth)],
-            $this->goals,
-        );
+        $goals = Goal::query()
+            ->withSum('deposits', 'amount')
+            ->orderBy('due_month')
+            ->orderBy('id')
+            ->get()
+            ->map(function (Goal $goal) use ($currentMonth) {
+                $item = [
+                    'id' => $goal->id,
+                    'name' => $goal->name,
+                    'saved' => $goal->saved,
+                    'target' => $goal->target,
+                    'due' => $goal->due_month,
+                ];
 
-        $names = array_column($this->goals, 'name', 'id');
+                return $item + ['progress' => GoalProgress::for($item, $currentMonth)];
+            });
 
-        $deposits = collect($this->deposits)
-            ->filter(fn (array $d) => isset($names[$d['goal_id']]))
-            ->map(fn (array $d) => $d + ['goal' => $names[$d['goal_id']]])
-            ->sortBy([['date', 'desc'], ['id', 'desc']])
-            ->values()
+        $deposits = GoalDeposit::query()
+            ->with(['goal:id,name', 'account:id,name'])
+            ->orderByDesc('date')
+            ->orderByDesc('id')
+            ->limit(10)
+            ->get()
+            ->map(fn (GoalDeposit $d) => [
+                'id' => $d->id,
+                'date' => $d->date->toDateString(),
+                'goal' => $d->goal->name,
+                'account' => $d->account?->name,
+                'amount' => $d->amount,
+            ])
             ->all();
 
         return view('livewire.goals', [
-            'items' => $goals,
+            'items' => $goals->all(),
             'depositRows' => $deposits,
             'editing' => $this->editingId !== null,
-            'depositGoal' => $this->depositGoalId ? $this->findGoal($this->depositGoalId) : null,
-            'accounts' => DepositForm::ACCOUNTS,
+            'depositGoal' => $this->depositGoalId ? $goals->firstWhere('id', $this->depositGoalId) : null,
+            'accounts' => Account::query()->orderBy('id')->get(['id', 'name']),
             'totals' => [
-                'saved' => array_sum(array_column($this->goals, 'saved')),
-                'remaining' => array_sum(array_map(fn (array $g) => $g['progress']['remaining'], $goals)),
-                'monthly' => array_sum(array_map(fn (array $g) => $g['progress']['monthly'], $goals)),
+                'saved' => $goals->sum('saved'),
+                'remaining' => $goals->sum(fn (array $g) => $g['progress']['remaining']),
+                'monthly' => $goals->sum(fn (array $g) => $g['progress']['monthly']),
             ],
         ]);
     }
@@ -154,28 +171,5 @@ class Goals extends Component
         $this->editingId = null;
 
         $this->dispatch('close-modal', name: 'goal-form');
-    }
-
-    private function findGoal(int $id): ?array
-    {
-        $index = $this->goalIndex($id);
-
-        return $index === null ? null : $this->goals[$index];
-    }
-
-    private function goalIndex(?int $id): ?int
-    {
-        foreach ($this->goals as $index => $goal) {
-            if ($goal['id'] === $id) {
-                return $index;
-            }
-        }
-
-        return null;
-    }
-
-    private function nextId(array $rows): int
-    {
-        return max(array_column($rows, 'id') ?: [0]) + 1;
     }
 }

@@ -10,7 +10,7 @@
             <dd class="font-display text-[28px] font-semibold tabular-nums">{{ Money::brl($totals['limit'], decimals: 0) }}</dd>
         </div>
         <div>
-            <dt class="text-sm text-on-ink-muted">Gasto até agora</dt>
+            <dt class="text-sm text-on-ink-muted">{{ $pace['state'] === 'closed' ? 'Gasto no mês' : 'Gasto até agora' }}</dt>
             <dd class="font-display text-[28px] font-semibold tabular-nums text-expense-on-ink">{{ Money::brl($totals['spent'], decimals: 0) }}</dd>
         </div>
         <div>
@@ -23,7 +23,7 @@
         </div>
         <div>
             <dt class="text-sm text-on-ink-muted">Dias restantes</dt>
-            <dd class="font-display text-[28px] font-semibold tabular-nums">{{ $pace['closed'] ? '—' : $pace['daysLeft'] }}</dd>
+            <dd class="font-display text-[28px] font-semibold tabular-nums">{{ $pace['state'] === 'closed' ? '—' : $pace['daysLeft'] }}</dd>
         </div>
     </dl>
 
@@ -36,21 +36,26 @@
                 size="h-3"
                 label="Orçamento do mês usado"
             />
-            @unless ($pace['closed'])
+            @if ($pace['state'] === 'current')
                 <span
                     class="absolute -top-1 -bottom-1 w-0.5 bg-white"
                     style="left: {{ $pace['percent'] }}%"
                     aria-hidden="true"
                 ></span>
-            @endunless
+            @endif
         </div>
         <div class="flex flex-wrap justify-between gap-2 text-[13px] text-on-ink-muted">
             <span>{{ $used }}% do orçamento usado</span>
-            @if ($pace['closed'])
-                <span>Mês encerrado</span>
-            @else
-                <span>Marca branca: ponto do mês (dia {{ $pace['day'] }} de {{ $pace['days'] }})</span>
-            @endif
+            @switch($pace['state'])
+                @case('current')
+                    <span>Marca branca: ponto do mês (dia {{ $pace['day'] }} de {{ $pace['days'] }})</span>
+                    @break
+                @case('closed')
+                    <span>Mês encerrado</span>
+                    @break
+                @default
+                    <span>O mês ainda não começou</span>
+            @endswitch
         </div>
     </div>
 </section>

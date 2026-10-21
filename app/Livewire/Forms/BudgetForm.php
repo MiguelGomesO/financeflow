@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Forms;
 
+use App\Models\Budget;
 use App\Support\Money;
 use Closure;
 use Illuminate\Validation\Rule;
@@ -9,21 +10,32 @@ use Livewire\Form;
 
 class BudgetForm extends Form
 {
-    public string $category = '';
+    public string $categoryId = '';
 
     /** Texto digitado pelo usuário, ex.: "1.500,00". */
     public string $limit = '';
 
+    public function setBudget(Budget $budget): void
+    {
+        $this->clear();
+        $this->categoryId = (string) $budget->category_id;
+        $this->limit = number_format($budget->limit, 2, ',', '.');
+    }
+
     /**
-     * Valida e devolve o orçamento pronto para entrar na lista.
+     * Valida e devolve os atributos do orçamento.
      *
-     * @param  array<string>  $available  categorias que ainda não têm orçamento no mês
+     * @param  int|null  $ignoreId  orçamento em edição (a categoria dele não conta como repetida)
      */
-    public function toBudget(array $available): array
+    public function validated(string $month, ?int $ignoreId = null): array
     {
         $this->validate(
             [
-                'category' => ['required', Rule::in($available)],
+                'categoryId' => [
+                    'required',
+                    Rule::exists('categories', 'id')->where('type', 'expense'),
+                    Rule::unique('budgets', 'category_id')->where('month', $month)->ignore($ignoreId),
+                ],
                 'limit' => ['required', function (string $attribute, mixed $value, Closure $fail) {
                     if (Money::parse((string) $value) <= 0) {
                         $fail('Informe um limite maior que zero, ex.: 500,00.');
@@ -31,15 +43,16 @@ class BudgetForm extends Form
                 }],
             ],
             [
-                'category.required' => 'Escolha uma categoria.',
-                'category.in' => 'Essa categoria já tem orçamento neste mês.',
+                'categoryId.required' => 'Escolha uma categoria.',
+                'categoryId.exists' => 'Escolha uma categoria de despesa.',
+                'categoryId.unique' => 'Essa categoria já tem orçamento neste mês.',
                 'limit.required' => 'Informe o limite do mês.',
             ],
         );
 
         return [
-            'name' => $this->category,
-            'spent' => 0,
+            'category_id' => (int) $this->categoryId,
+            'month' => $month,
             'limit' => Money::parse($this->limit),
         ];
     }

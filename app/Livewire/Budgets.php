@@ -3,8 +3,11 @@
 namespace App\Livewire;
 
 use App\Livewire\Forms\BudgetForm;
+use App\Models\Budget;
+use App\Models\Category;
 use App\Support\Dates;
-use App\Support\SampleData;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -14,43 +17,100 @@ class Budgets extends Component
 {
     public BudgetForm $form;
 
-    /** Mês exibido, no formato "Y-m". */
+    /** Mês exibido, "Y-m". */
     #[Url(except: '')]
     public string $month = '';
 
-    /** Por enquanto os orçamentos vivem no estado do componente (sem banco). */
-    public array $budgets = [];
+    /** Orçamento aberto no modal (null = criando). */
+    public ?int $editingId = null;
 
     public function mount(): void
     {
-        $this->budgets = SampleData::budgets();
         $this->normalizeMonth();
     }
 
     public function updatedMonth(): void
     {
         $this->normalizeMonth();
+        $this->editingId = null;
         $this->form->clear();
+    }
+
+    public function openCreate(): void
+    {
+        $this->editingId = null;
+        $this->form->clear();
+
+        $this->dispatch('open-modal', name: 'budget-form');
+    }
+
+    public function edit(int $id): void
+    {
+        $budget = Budget::query()->where('month', $this->month)->find($id);
+
+        if ($budget === null) {
+            return;
+        }
+
+        $this->editingId = $budget->id;
+        $this->form->setBudget($budget);
+
+        $this->dispatch('open-modal', name: 'budget-form');
     }
 
     public function save(): void
     {
-        $this->budgets[$this->month][] = $this->form->toBudget($this->availableCategories());
-        $this->form->clear();
+        $data = $this->form->validated($this->month, $this->editingId);
 
-        $this->dispatch('close-modal', name: 'new-budget');
+        if ($this->editingId === null) {
+            Budget::create($data);
+        } else {
+            // Ao editar, só o limite muda.
+            Budget::whereKey($this->editingId)->update(['limit' => $data['limit']]);
+        }
+
+        $this->closeForm();
+    }
+
+    public function delete(): void
+    {
+        Budget::whereKey($this->editingId)->delete();
+
+        $this->closeForm();
+    }
+
+    /** Cria no mês exibido os mesmos limites do mês anterior (sem repetir categorias). */
+    public function copyPrevious(): void
+    {
+        Budget::query()
+            ->where('month', $this->previousMonth())
+            ->get()
+            ->each(fn (Budget $budget) => Budget::firstOrCreate(
+                ['category_id' => $budget->category_id, 'month' => $this->month],
+                ['limit' => $budget->limit],
+            ));
     }
 
     public function render()
     {
-        $budgets = $this->budgets[$this->month] ?? [];
-        $limit = array_sum(array_column($budgets, 'limit'));
-        $spent = array_sum(array_column($budgets, 'spent'));
+        $items = Budget::query()
+            ->with('category:id,name')
+            ->withSpent($this->month)
+            ->where('month', $this->month)
+            ->get()
+            ->sortBy(fn (Budget $b) => $b->category->name)
+            ->values();
+
+        $limit = (float) $items->sum('limit');
+        $spent = (float) $items->sum('spent');
 
         return view('livewire.budgets', [
-            'months' => array_map(Dates::monthLabel(...), array_combine(array_keys($this->budgets), array_keys($this->budgets))),
-            'items' => $budgets,
-            'available' => $this->availableCategories(),
+            'months' => $this->monthOptions(),
+            'items' => $items,
+            'available' => $this->availableCategories($items),
+            'editingName' => $items->firstWhere('id', $this->editingId)?->category->name,
+            'previousLabel' => Dates::monthLabel($this->previousMonth()),
+            'canCopyPrevious' => $items->isEmpty() && Budget::where('month', $this->previousMonth())->exists(),
             'pace' => $this->pace(),
             'totals' => [
                 'limit' => $limit,
@@ -62,39 +122,78 @@ class Budgets extends Component
     }
 
     /**
-     * Onde estamos no mês: no mês atual, o dia de hoje e os dias restantes;
-     * meses anteriores já estão encerrados.
+     * Onde estamos no mês exibido:
+     * "current" (mês atual, com o dia de hoje), "closed" (já passou) ou "future" (ainda não começou).
      */
     private function pace(): array
     {
-        $today = SampleData::today();
+        $today = now();
+        $days = Carbon::createFromFormat('!Y-m', $this->month)->daysInMonth;
+        $current = $today->format('Y-m');
 
-        if ($this->month !== $today->format('Y-m')) {
-            return ['closed' => true, 'day' => null, 'days' => null, 'daysLeft' => 0, 'percent' => 100];
-        }
-
-        $days = $today->daysInMonth;
-
-        return [
-            'closed' => false,
-            'day' => $today->day,
-            'days' => $days,
-            'daysLeft' => $days - $today->day,
-            'percent' => $today->day / $days * 100,
-        ];
+        return match (true) {
+            $this->month === $current => [
+                'state' => 'current',
+                'day' => $today->day,
+                'days' => $days,
+                'daysLeft' => $days - $today->day,
+                'percent' => $today->day / $days * 100,
+            ],
+            $this->month < $current => ['state' => 'closed', 'day' => null, 'days' => $days, 'daysLeft' => 0, 'percent' => 100],
+            default => ['state' => 'future', 'day' => null, 'days' => $days, 'daysLeft' => $days, 'percent' => 0],
+        };
     }
 
-    private function availableCategories(): array
+    /** Categorias de despesa ainda sem orçamento no mês. */
+    private function availableCategories(Collection $items): Collection
     {
-        $taken = array_column($this->budgets[$this->month] ?? [], 'name');
+        return Category::query()
+            ->ofType('expense')
+            ->whereNotIn('id', $items->pluck('category_id'))
+            ->orderBy('name')
+            ->get(['id', 'name']);
+    }
 
-        return array_values(array_diff(SampleData::CATEGORIES, SampleData::INCOME_CATEGORIES, $taken));
+    /** Do mês seguinte (para planejar) até o orçamento mais antigo, ou 2 meses atrás. */
+    private function monthOptions(): array
+    {
+        $next = now()->startOfMonth()->addMonth();
+        $oldest = Budget::query()->min('month');
+        $first = now()->startOfMonth()->subMonths(2);
+
+        if ($oldest !== null && $oldest < $first->format('Y-m')) {
+            $first = Carbon::createFromFormat('!Y-m', $oldest);
+        }
+
+        $options = [];
+        for ($month = $next->copy(); $month->greaterThanOrEqualTo($first); $month->subMonth()) {
+            $options[$month->format('Y-m')] = Dates::monthLabel($month->format('Y-m'));
+        }
+
+        // Um mês fora da faixa escolhido pela URL continua aparecendo.
+        $options[$this->month] ??= Dates::monthLabel($this->month);
+        krsort($options);
+
+        return $options;
+    }
+
+    private function previousMonth(): string
+    {
+        return Carbon::createFromFormat('!Y-m', $this->month)->subMonth()->format('Y-m');
+    }
+
+    private function closeForm(): void
+    {
+        $this->editingId = null;
+        $this->form->clear();
+
+        $this->dispatch('close-modal', name: 'budget-form');
     }
 
     private function normalizeMonth(): void
     {
-        if (! array_key_exists($this->month, $this->budgets)) {
-            $this->month = SampleData::currentMonth();
+        if (! preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $this->month)) {
+            $this->month = now()->format('Y-m');
         }
     }
 }

@@ -39,5 +39,5 @@
         </div>
     </div>
 
-    <x-accounts.edit-button wire:click="editCard({{ $card->id }})" :label="'Editar '.$card->name" class="absolute top-3 right-3" />
+    <x-ui.edit-button wire:click="editCard({{ $card->id }})" :label="'Editar '.$card->name" class="absolute top-3 right-3" />
 </article>

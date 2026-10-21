@@ -7,16 +7,28 @@ use Closure;
 use Illuminate\Validation\Rule;
 use Livewire\Form;
 
+/**
+ * Depósito numa meta. Não mexe no saldo da conta: marca dinheiro como
+ * reservado para a meta; a conta indica onde ele está guardado.
+ */
 class DepositForm extends Form
 {
-    /** Contas de onde um depósito pode sair (cartão de crédito não entra). */
-    public const ACCOUNTS = ['Conta corrente', 'Poupança', 'Carteira'];
-
     public string $amount = '';
 
-    public string $account = 'Conta corrente';
+    /** Id da conta onde o dinheiro está guardado ('' = não informar). */
+    public string $account = '';
 
-    /** Valida e devolve o valor do depósito e a conta de origem. */
+    public string $date = '';
+
+    public function setDefaults(?int $accountId): void
+    {
+        $this->reset();
+        $this->resetErrorBag();
+        $this->account = (string) ($accountId ?? '');
+        $this->date = now()->toDateString();
+    }
+
+    /** Valida e devolve os atributos do depósito. */
     public function validated(): array
     {
         $this->validate(
@@ -26,20 +38,21 @@ class DepositForm extends Form
                         $fail('Informe um valor maior que zero, ex.: 200,00.');
                     }
                 }],
-                'account' => ['required', Rule::in(self::ACCOUNTS)],
+                'account' => ['nullable', Rule::exists('accounts', 'id')],
+                'date' => ['required', 'date_format:Y-m-d'],
             ],
             [
                 'amount.required' => 'Informe o valor do depósito.',
-                'account.in' => 'Escolha uma conta da lista.',
+                'account.exists' => 'Escolha uma conta da lista.',
+                'date.required' => 'Informe a data.',
+                'date.date_format' => 'Data inválida.',
             ],
         );
 
-        return ['amount' => Money::parse($this->amount), 'account' => $this->account];
-    }
-
-    public function clear(): void
-    {
-        $this->reset();
-        $this->resetErrorBag();
+        return [
+            'amount' => Money::parse($this->amount),
+            'account_id' => $this->account !== '' ? (int) $this->account : null,
+            'date' => $this->date,
+        ];
     }
 }

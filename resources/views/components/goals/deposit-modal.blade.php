@@ -10,25 +10,34 @@
     @endif
 
     <form wire:submit="saveDeposit" class="flex flex-col gap-4">
-        <x-ui.field label="Valor (R$)" for="deposit-amount" error="deposit.amount">
-            <input
-                id="deposit-amount"
-                type="text"
-                inputmode="decimal"
-                wire:model="deposit.amount"
-                placeholder="0,00"
-                class="input font-display text-xl"
-                @error('deposit.amount') aria-invalid="true" aria-describedby="deposit-amount-error" @enderror
-            >
-        </x-ui.field>
+        <div class="grid grid-cols-2 gap-3">
+            <x-ui.field label="Valor (R$)" for="deposit-amount" error="deposit.amount">
+                <input
+                    id="deposit-amount"
+                    type="text"
+                    inputmode="decimal"
+                    wire:model="deposit.amount"
+                    placeholder="0,00"
+                    class="input font-display text-lg"
+                    @error('deposit.amount') aria-invalid="true" aria-describedby="deposit-amount-error" @enderror
+                >
+            </x-ui.field>
 
-        <x-ui.field label="Sai da conta" for="deposit-account" error="deposit.account">
+            <x-ui.field label="Data" for="deposit-date" error="deposit.date">
+                <input id="deposit-date" type="date" wire:model="deposit.date" class="input px-2.5">
+            </x-ui.field>
+        </div>
+
+        <x-ui.field label="Guardado em" for="deposit-account" error="deposit.account">
             <select id="deposit-account" wire:model="deposit.account" class="input">
+                <option value="">Não informar</option>
                 @foreach ($accounts as $account)
-                    <option value="{{ $account }}">{{ $account }}</option>
+                    <option value="{{ $account->id }}">{{ $account->name }}</option>
                 @endforeach
             </select>
         </x-ui.field>
+
+        <p class="-mt-2 text-[13px] text-muted">O depósito reserva o dinheiro para a meta; o saldo da conta não muda.</p>
 
         <button
             type="submit"

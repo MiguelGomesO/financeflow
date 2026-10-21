@@ -10,7 +10,7 @@
             <h3 class="truncate font-semibold">{{ $account->name }}</h3>
             <span class="truncate text-[13px] text-muted">{{ $account->institution ?? $account->type }}</span>
         </div>
-        <x-accounts.edit-button wire:click="editAccount({{ $account->id }})" :label="'Editar '.$account->name" class="-mr-2 -mt-1" />
+        <x-ui.edit-button wire:click="editAccount({{ $account->id }})" :label="'Editar '.$account->name" class="-mr-2 -mt-1" />
     </div>
 
     <span @class([
