@@ -41,16 +41,16 @@
                     x-bind:class="kind === 'income' ? 'bg-white text-ink shadow-sm' : 'text-body'">Receita</button>
             </div>
 
-            <x-dashboard.field label="Descrição" for="tx-description">
+            <x-ui.field label="Descrição" for="tx-description">
                 <input id="tx-description" x-ref="description" type="text" placeholder="Ex.: Padaria" class="input">
-            </x-dashboard.field>
+            </x-ui.field>
 
-            <x-dashboard.field label="Valor (R$)" for="tx-amount">
+            <x-ui.field label="Valor (R$)" for="tx-amount">
                 <input id="tx-amount" type="text" inputmode="decimal" placeholder="0,00" class="input font-display text-xl">
-            </x-dashboard.field>
+            </x-ui.field>
 
             <div class="grid grid-cols-2 gap-3">
-                <x-dashboard.field label="Categoria" for="tx-category">
+                <x-ui.field label="Categoria" for="tx-category">
                     <select id="tx-category" class="input">
                         <option>Mercado</option>
                         <option>Moradia</option>
@@ -59,20 +59,20 @@
                         <option>Saúde</option>
                         <option>Renda</option>
                     </select>
-                </x-dashboard.field>
+                </x-ui.field>
 
-                <x-dashboard.field label="Conta" for="tx-account">
+                <x-ui.field label="Conta" for="tx-account">
                     <select id="tx-account" class="input">
                         <option>Conta corrente</option>
                         <option>Cartão de crédito</option>
                         <option>Carteira</option>
                     </select>
-                </x-dashboard.field>
+                </x-ui.field>
             </div>
 
-            <x-dashboard.field label="Data" for="tx-date">
+            <x-ui.field label="Data" for="tx-date">
                 <input id="tx-date" type="date" value="{{ now()->toDateString() }}" class="input">
-            </x-dashboard.field>
+            </x-ui.field>
 
             <button type="submit" class="min-h-12 rounded-xl bg-brand font-semibold text-white hover:bg-brand-dark">
                 Salvar transação

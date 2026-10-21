@@ -26,7 +26,7 @@
 
     <nav aria-label="Menu do app" class="flex flex-col gap-1">
         <x-sidebar.link :href="route('dashboard')" icon="overview" :active="request()->routeIs('dashboard')">Visão geral</x-sidebar.link>
-        <x-sidebar.link href="#" icon="transactions">Transações</x-sidebar.link>
+        <x-sidebar.link :href="route('transactions')" icon="transactions" :active="request()->routeIs('transactions')">Transações</x-sidebar.link>
         <x-sidebar.link href="#" icon="budget">Orçamentos</x-sidebar.link>
         <x-sidebar.link href="#" icon="goal">Metas</x-sidebar.link>
         <x-sidebar.link href="#" icon="card">Contas e cartões</x-sidebar.link>

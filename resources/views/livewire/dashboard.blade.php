@@ -27,15 +27,15 @@
     </div>
 
     <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4" wire:loading.class="opacity-60" wire:target="period">
-        <x-dashboard.stat-card
+        <x-ui.stat-card
             tone="dark"
             label="Saldo total"
             :value="Money::brl($stats['balance'])"
             :hint="$stats['accounts'].' contas'"
         />
-        <x-dashboard.stat-card tone="income" label="Entradas" :value="Money::brl($stats['income'])" :hint="$periods[$period]" />
-        <x-dashboard.stat-card tone="expense" label="Saídas" :value="Money::brl($stats['expense'])" :hint="$periods[$period]" />
-        <x-dashboard.stat-card label="Economia" :value="$stats['savingsRate'].'%'" hint="da renda guardada" />
+        <x-ui.stat-card tone="income" label="Entradas" :value="Money::brl($stats['income'])" :hint="$periods[$period]" />
+        <x-ui.stat-card tone="expense" label="Saídas" :value="Money::brl($stats['expense'])" :hint="$periods[$period]" />
+        <x-ui.stat-card label="Economia" :value="$stats['savingsRate'].'%'" hint="da renda guardada" />
     </div>
 
     <div class="grid gap-4 xl:grid-cols-2">

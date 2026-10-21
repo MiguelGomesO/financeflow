@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Support\SampleData;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -95,11 +96,7 @@ class Dashboard extends Component
 
     private function accounts(): array
     {
-        return [
-            ['name' => 'Conta corrente', 'balance' => 4180.55],
-            ['name' => 'Poupança', 'balance' => 8420.00],
-            ['name' => 'Carteira', 'balance' => 240.00],
-        ];
+        return SampleData::accounts();
     }
 
     private function cashFlow(): array
@@ -127,14 +124,7 @@ class Dashboard extends Component
 
     private function recentTransactions(): array
     {
-        return [
-            ['description' => 'Padaria', 'category' => 'Mercado', 'date' => '21/10', 'amount' => -24.50],
-            ['description' => 'Cinema', 'category' => 'Lazer', 'date' => '19/10', 'amount' => -64.00],
-            ['description' => 'Supermercado', 'category' => 'Mercado', 'date' => '18/10', 'amount' => -286.40],
-            ['description' => 'Freelance', 'category' => 'Renda', 'date' => '14/10', 'amount' => 750.00],
-            ['description' => 'Aluguel', 'category' => 'Moradia', 'date' => '10/10', 'amount' => -1800.00],
-            ['description' => 'Salário', 'category' => 'Renda', 'date' => '05/10', 'amount' => 7500.00],
-        ];
+        return array_slice(SampleData::transactions(), 0, 6);
     }
 
     private function goals(): array

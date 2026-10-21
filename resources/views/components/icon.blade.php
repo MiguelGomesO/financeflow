@@ -38,5 +38,11 @@
         @case('close')
             <path d="M18 6 6 18M6 6l12 12" />
             @break
+        @case('search')
+            <circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" />
+            @break
+        @case('trash')
+            <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" /><path d="M10 11v6M14 11v6" />
+            @break
     @endswitch
 </svg>

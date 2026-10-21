@@ -9,11 +9,11 @@
     };
 @endphp
 
-<div @class([
+<div {{ $attributes->class([
     'flex flex-col gap-1.5 rounded-[20px] p-[22px]',
     'bg-ink text-white' => $dark,
     'border border-line bg-white' => ! $dark,
-])>
+]) }}>
     <span @class(['text-sm', 'text-on-ink-muted' => $dark, 'text-muted' => ! $dark])>{{ $label }}</span>
     <span @class(['font-display text-[30px] font-semibold tabular-nums leading-tight', $valueColor])>{{ $value }}</span>
     @if ($hint)
