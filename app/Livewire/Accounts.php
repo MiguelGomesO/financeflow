@@ -7,6 +7,7 @@ use App\Livewire\Forms\TransferForm;
 use App\Models\Account;
 use App\Models\CreditCard;
 use App\Models\Transfer;
+use App\Support\Money;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
@@ -21,6 +22,11 @@ class Accounts extends Component
     public ?string $editingKind = null;
 
     public ?int $editingId = null;
+
+    /** Cartão que está recebendo a fatura atual informada, e o texto digitado. */
+    public ?int $billCardId = null;
+
+    public string $billAmount = '';
 
     /** Motivo de uma exclusão recusada, mostrado no modal. */
     public ?string $deleteError = null;
@@ -63,6 +69,43 @@ class Accounts extends Component
         $this->form->setCard($card);
 
         $this->dispatch('open-modal', name: 'account-form');
+    }
+
+    /** Abre o modal para informar a fatura atual do cartão. */
+    public function addBill(int $id): void
+    {
+        $card = CreditCard::find($id);
+
+        if ($card === null) {
+            return;
+        }
+
+        $bill = $card->billOverride();
+
+        $this->billCardId = $card->id;
+        $this->billAmount = $bill === null ? '' : number_format($bill, 2, ',', '.');
+        $this->resetErrorBag();
+
+        $this->dispatch('open-modal', name: 'card-bill');
+    }
+
+    /** Grava a fatura informada; em branco, volta a somar as compras do ciclo. */
+    public function saveBill(): void
+    {
+        $this->validate(
+            ['billAmount' => ['nullable', 'regex:/^[\d.,\s]*$/']],
+            ['billAmount.regex' => 'Valor inválido.'],
+        );
+
+        $card = CreditCard::find($this->billCardId);
+
+        if ($card !== null) {
+            $card->update(['bill_amount' => trim($this->billAmount) === '' ? null : Money::parse($this->billAmount)]);
+        }
+
+        $this->reset('billCardId', 'billAmount');
+
+        $this->dispatch('close-modal', name: 'card-bill');
     }
 
     public function saveAccount(): void
@@ -136,8 +179,8 @@ class Accounts extends Component
     {
         $accounts = Account::query()->withBalance()->orderBy('id')->get();
         $cards = CreditCard::query()->orderBy('id')->get();
-        $bills = $cards->mapWithKeys(fn (CreditCard $card) => [$card->id => $card->currentBill()]);
-
+        $bills = $cards->mapWithKeys(fn (CreditCard $card) => [$card->id => $card->openBill()]);
+        $used = $cards->mapWithKeys(fn (CreditCard $card) => [$card->id => $card->usedLimit()]);
         $balance = round($accounts->sum('balance'), 2);
         $billsTotal = round($bills->sum(), 2);
 
@@ -145,7 +188,7 @@ class Accounts extends Component
             'accounts' => $accounts,
             'cards' => $cards,
             'bills' => $bills,
-            'transfers' => Transfer::query()
+            'used' => $used,            'transfers' => Transfer::query()
                 ->with(['fromAccount:id,name', 'toAccount:id,name'])
                 ->orderByDesc('date')->orderByDesc('id')
                 ->limit(5)

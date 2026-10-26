@@ -24,7 +24,7 @@
             </x-ui.field>
 
             <x-ui.field label="Data" for="deposit-date" error="deposit.date">
-                <input id="deposit-date" type="date" wire:model="deposit.date" class="input px-2.5">
+                <x-ui.date-picker id="deposit-date" wire:model="deposit.date" />
             </x-ui.field>
         </div>
 

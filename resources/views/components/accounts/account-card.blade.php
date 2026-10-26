@@ -3,9 +3,11 @@
 
 <article {{ $attributes->class(['flex flex-col gap-3.5 rounded-[20px] border border-line bg-white p-[22px]']) }}>
     <div class="flex items-center gap-3">
-        <span class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-brand-light font-bold text-brand-dark" aria-hidden="true">
-            {{ mb_substr($account->name, 0, 1) }}
-        </span>
+        <x-bank-logo :name="$account->institution" :fallback="$account->name" class="size-11 rounded-xl text-[13px]">
+            <span class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-brand-light font-bold text-brand-dark" aria-hidden="true">
+                {{ mb_substr($account->name, 0, 1) }}
+            </span>
+        </x-bank-logo>
         <div class="flex min-w-0 flex-1 flex-col">
             <h3 class="truncate font-semibold">{{ $account->name }}</h3>
             <span class="truncate text-[13px] text-muted">{{ $account->institution ?? $account->type }}</span>

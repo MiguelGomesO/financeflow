@@ -4,10 +4,10 @@
 
 @php($progress = $goal['progress'])
 
-<article {{ $attributes->class(['flex flex-col gap-[18px] rounded-[20px] border border-line bg-white p-6']) }}>
+<article {{ $attributes->class(['flex h-full flex-col gap-[18px] rounded-[20px] border border-line bg-white p-6']) }}>
     <div class="flex items-start justify-between gap-3">
         <div class="flex min-w-0 flex-col gap-0.5">
-            <h2 class="font-display text-[19px] font-semibold">{{ $goal['name'] }}</h2>
+            <h2 class="truncate font-display text-[19px] font-semibold" title="{{ $goal['name'] }}">{{ $goal['name'] }}</h2>
             <span class="text-[13px] text-muted">Prazo: {{ Dates::shortMonth($goal['due']) }}</span>
         </div>
         <span class="shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold whitespace-nowrap {{ $progress['tag'] }}">
@@ -23,7 +23,7 @@
         <div class="flex min-w-0 flex-col gap-1">
             <span class="font-display text-2xl font-semibold tabular-nums">{{ Money::brl($goal['saved'], decimals: 0) }}</span>
             <span class="text-sm text-muted tabular-nums">de {{ Money::brl($goal['target'], decimals: 0) }}</span>
-            <span class="text-[13px] text-soft">
+            <span class="truncate text-[13px] text-soft">
                 @if ($progress['remaining'] <= 0)
                     Meta atingida
                 @else
@@ -33,7 +33,7 @@
         </div>
     </div>
 
-    <div class="flex gap-2">
+    <div class="mt-auto flex gap-2">
         <button
             type="button"
             wire:click="startDeposit({{ $goal['id'] }})"

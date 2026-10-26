@@ -37,6 +37,11 @@
                     <input id="card-limit" type="text" inputmode="decimal" wire:model="form.limit" placeholder="0,00" class="input">
                 </x-ui.field>
 
+                <x-ui.field label="Limite usado (R$)" for="card-used" error="form.usedLimit" class="col-span-2">
+                    <input id="card-used" type="text" inputmode="decimal" wire:model="form.usedLimit" placeholder="Opcional, ex.: 377,30" class="input">
+                    <p class="text-[13px] text-muted">Informe o que o banco ou a loja mostra. Em branco, usa a fatura em aberto.</p>
+                </x-ui.field>
+
                 <x-ui.field label="Dia do fechamento" for="card-close" error="form.closeDay">
                     <input id="card-close" type="number" min="1" max="31" wire:model="form.closeDay" class="input">
                 </x-ui.field>
@@ -65,7 +70,12 @@
             @endif
 
             <x-ui.field label="Banco ou instituição (opcional)" for="account-institution" error="form.institution">
-                <input id="account-institution" type="text" wire:model="form.institution" maxlength="40" class="input">
+                <input id="account-institution" type="text" wire:model="form.institution" maxlength="40" list="bank-names" class="input">
+                <datalist id="bank-names">
+                    @foreach (\App\Support\Banks::names() as $bankName)
+                        <option value="{{ $bankName }}"></option>
+                    @endforeach
+                </datalist>
             </x-ui.field>
 
             <x-ui.field label="Observação (opcional)" for="account-note" error="form.note">

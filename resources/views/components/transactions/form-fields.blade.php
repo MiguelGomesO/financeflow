@@ -58,5 +58,5 @@
 </div>
 
 <x-ui.field label="Data" for="{{ $prefix }}-date" error="form.date">
-    <input id="{{ $prefix }}-date" type="date" wire:model="form.date" class="input">
+    <x-ui.date-picker id="{{ $prefix }}-date" wire:model="form.date" />
 </x-ui.field>

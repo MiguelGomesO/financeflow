@@ -33,7 +33,7 @@
             </x-ui.field>
 
             <x-ui.field label="Data" for="transfer-date" error="transfer.date">
-                <input id="transfer-date" type="date" wire:model="transfer.date" class="input px-2.5">
+                <x-ui.date-picker id="transfer-date" wire:model="transfer.date" />
             </x-ui.field>
         </div>
 

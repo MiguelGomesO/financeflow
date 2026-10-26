@@ -28,13 +28,7 @@
             </x-ui.field>
 
             <x-ui.field label="Prazo" for="goal-due" error="form.due">
-                <input
-                    id="goal-due"
-                    type="month"
-                    wire:model="form.due"
-                    class="input px-2.5"
-                    @error('form.due') aria-invalid="true" aria-describedby="goal-due-error" @enderror
-                >
+                <x-ui.date-picker id="goal-due" mode="month" wire:model="form.due" />
             </x-ui.field>
         </div>
 

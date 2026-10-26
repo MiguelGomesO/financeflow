@@ -76,6 +76,98 @@ class AccountsTest extends TestCase
             ->assertSee('R$ 800,00 livres');
     }
 
+    public function test_future_bills_do_not_use_the_limit(): void
+    {
+        // Ciclo aberto: 04/10 a 03/11; os lançamentos de novembro em diante são de faturas futuras.
+        $card = CreditCard::factory()->create(['close_day' => 3, 'limit' => 1000]);
+
+        $this->expense(['account_id' => null, 'credit_card_id' => $card->id, 'amount' => -88.82, 'date' => '2026-11-08']);
+        $this->expense(['account_id' => null, 'credit_card_id' => $card->id, 'amount' => -88.82, 'date' => '2026-12-08']);
+
+        $this->assertSame(0.0, $card->usedLimit());
+
+        Livewire::test(Accounts::class)->assertSee('R$ 1.000,00 livres');
+    }
+
+    public function test_manual_used_limit_overrides_the_open_bill(): void
+    {
+        $card = CreditCard::factory()->create(['close_day' => 3, 'limit' => 1000]);
+
+        $this->assertSame(0.0, $card->usedLimit());
+
+        $card->update(['used_limit' => 377.30]);
+
+        Livewire::test(Accounts::class)
+            ->assertSee('38% do limite de R$ 1.000,00')
+            ->assertSee('R$ 622,70 livres');
+    }
+
+    public function test_used_limit_is_edited_from_the_card_form(): void
+    {
+        $card = CreditCard::factory()->create();
+
+        Livewire::test(Accounts::class)
+            ->call('editCard', $card->id)
+            ->set('form.usedLimit', '377,30')
+            ->call('saveAccount')
+            ->assertHasNoErrors();
+
+        $this->assertSame(377.3, $card->fresh()->used_limit);
+
+        Livewire::test(Accounts::class)
+            ->call('editCard', $card->id)
+            ->set('form.usedLimit', '')
+            ->call('saveAccount');
+
+        $this->assertNull($card->fresh()->used_limit);
+    }
+
+    public function test_manual_bill_overrides_the_purchases_until_the_cycle_closes(): void
+    {
+        // Ciclo aberto: 04/10 a 03/11.
+        $card = CreditCard::factory()->create(['close_day' => 3, 'limit' => 1000, 'bill_amount' => 178.23]);
+        $this->expense(['account_id' => null, 'credit_card_id' => $card->id, 'amount' => -50, 'date' => '2026-10-10']);
+
+        $this->assertSame('2026-11-03', $card->bill_until->toDateString());
+        $this->assertSame(178.23, $card->openBill());
+        $this->assertSame(178.23, $card->usedLimit());
+
+        Livewire::test(Accounts::class)
+            ->assertSee('R$ 178,23')
+            ->assertSee('R$ 821,77 livres');
+
+        // Depois do fechamento volta a somar as compras do novo ciclo.
+        $this->assertSame(0.0, $card->openBill(Carbon::parse('2026-11-04')) + 0.0);
+    }
+
+    public function test_manual_bill_is_saved_from_its_own_modal(): void
+    {
+        $card = CreditCard::factory()->create(['close_day' => 3]);
+
+        Livewire::test(Accounts::class)
+            ->call('addBill', $card->id)
+            ->assertDispatched('open-modal', name: 'card-bill')
+            ->set('billAmount', '178,23')
+            ->call('saveBill')
+            ->assertHasNoErrors()
+            ->assertDispatched('close-modal', name: 'card-bill');
+
+        $this->assertSame(178.23, $card->fresh()->bill_amount);
+
+        Livewire::test(Accounts::class)
+            ->call('addBill', $card->id)
+            ->assertSet('billAmount', '178,23')
+            ->set('billAmount', 'abc')
+            ->call('saveBill')
+            ->assertHasErrors('billAmount')
+            ->set('billAmount', '')
+            ->call('saveBill');
+
+        $card = $card->fresh();
+        $this->assertNull($card->bill_amount);
+        $this->assertNull($card->bill_until);
+    }
+
     public function test_card_cycle_handles_short_months(): void
     {
         $card = CreditCard::factory()->make(['close_day' => 31]);

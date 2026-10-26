@@ -33,6 +33,9 @@ class AccountForm extends Form
 
     public string $limit = '';
 
+    /** Limite usado informado à mão; vazio = usa a fatura em aberto. */
+    public string $usedLimit = '';
+
     public string $closeDay = '';
 
     public string $dueDay = '';
@@ -60,6 +63,7 @@ class AccountForm extends Form
         $this->name = $card->name;
         $this->last4 = $card->last4;
         $this->limit = number_format($card->limit, 2, ',', '.');
+        $this->usedLimit = $card->used_limit === null ? '' : number_format($card->used_limit, 2, ',', '.');
         $this->closeDay = (string) $card->close_day;
         $this->dueDay = (string) $card->due_day;
     }
@@ -80,7 +84,7 @@ class AccountForm extends Form
                         $fail('Informe um limite maior que zero.');
                     }
                 }],
-                'closeDay' => ['required', 'integer', 'between:1,31'],
+                'usedLimit' => ['nullable', 'regex:/^[\d.,\s]*$/'],                'closeDay' => ['required', 'integer', 'between:1,31'],
                 'dueDay' => ['required', 'integer', 'between:1,31'],
             ];
         } else {
@@ -102,7 +106,7 @@ class AccountForm extends Form
             '*.integer' => 'Use um dia entre 1 e 31.',
             '*.between' => 'Use um dia entre 1 e 31.',
             'balance.regex' => 'Valor inválido.',
-            'type.in' => 'Escolha um tipo da lista.',
+            'usedLimit.regex' => 'Valor inválido.',            'type.in' => 'Escolha um tipo da lista.',
             'note.max' => 'Use no máximo 120 caracteres.',
         ]);
 
@@ -111,6 +115,7 @@ class AccountForm extends Form
                 'name' => trim($this->name),
                 'last4' => $this->last4,
                 'limit' => Money::parse($this->limit),
+                'used_limit' => trim($this->usedLimit) === '' ? null : Money::parse($this->usedLimit),
                 'close_day' => (int) $this->closeDay,
                 'due_day' => (int) $this->dueDay,
             ];

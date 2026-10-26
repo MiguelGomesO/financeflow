@@ -44,6 +44,15 @@
         @case('pencil')
             <path d="M12 20h9" /><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z" />
             @break
+        @case('calendar')
+            <rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" />
+            @break
+        @case('chevron-left')
+            <path d="m15 18-6-6 6-6" />
+            @break
+        @case('chevron-right')
+            <path d="m9 18 6-6-6-6" />
+            @break
         @case('download')
             <path d="M12 3v12M7 10l5 5 5-5" /><path d="M4 21h16" />
             @break
