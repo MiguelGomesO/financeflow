@@ -4,6 +4,7 @@ Aplicativo web de finanças pessoais: acompanhe contas, cartões de crédito, ga
 
 ## Funcionalidades
 
+- **Contas de usuário** – cadastro, login (com limite de tentativas) e logout. Cada usuário só enxerga e altera os próprios dados: contas, cartões, transações, orçamentos, metas e transferências são filtrados por usuário em todas as consultas, e há testes de isolamento entre usuários.
 - **Visão geral** – saldo, entradas e saídas do período, gastos por categoria, orçamentos, metas e transações recentes.
 - **Transações** – receitas e despesas por conta ou cartão, com filtros por mês, texto, tipo e categoria, e totais do mês.
 - **Orçamentos** – limite mensal por categoria, com alerta ao se aproximar do teto.
@@ -36,6 +37,12 @@ composer setup
 
 O `composer setup` instala as dependências, cria o `.env` a partir do `.env.example`, gera a chave da aplicação, roda as migrations e compila os assets.
 
+As fotos de perfil ficam em `storage/app/public`. Para o navegador enxergá-las, crie o link uma vez:
+
+```bash
+php artisan storage:link
+```
+
 Por padrão o `.env.example` usa SQLite. Para usar MySQL, ajuste no `.env` antes das migrations:
 
 ```env
@@ -62,12 +69,24 @@ php artisan serve
 npm run dev
 ```
 
+Ao abrir o app você cai na tela de login. Crie sua conta em **Criar conta** (`/cadastro`) e comece do zero.
+
 ### Dados de demonstração
 
-Para preencher o app com contas, cartões, transações dos últimos 6 meses, orçamentos e metas:
+Para preencher um usuário de demonstração com contas, cartões, transações dos últimos 6 meses, orçamentos e metas:
 
 ```bash
 php artisan db:seed --class=DemoSeeder
+```
+
+Depois entre com `demo@financeflow.test` e a senha `demo1234`.
+
+### Dados anteriores ao login
+
+Registros criados antes de existir login ficam sem dono e não aparecem para ninguém. Para entregá-los a um usuário já cadastrado:
+
+```bash
+php artisan finance:claim seu@email.com
 ```
 
 ## Testes

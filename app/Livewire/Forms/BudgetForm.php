@@ -5,6 +5,7 @@ namespace App\Livewire\Forms;
 use App\Models\Budget;
 use App\Support\Money;
 use Closure;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Livewire\Form;
 
@@ -34,7 +35,7 @@ class BudgetForm extends Form
                 'categoryId' => [
                     'required',
                     Rule::exists('categories', 'id')->where('type', 'expense'),
-                    Rule::unique('budgets', 'category_id')->where('month', $month)->ignore($ignoreId),
+                    Rule::unique('budgets', 'category_id')->where('month', $month)->where('user_id', Auth::id())->ignore($ignoreId),
                 ],
                 'limit' => ['required', function (string $attribute, mixed $value, Closure $fail) {
                     if (Money::parse((string) $value) <= 0) {

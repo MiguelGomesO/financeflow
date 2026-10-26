@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToUser;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -10,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class CreditCard extends Model
 {
-    use HasFactory;
+    use BelongsToUser, HasFactory;
 
     protected $fillable = ['name', 'last4', 'limit', 'used_limit', 'bill_amount', 'bill_until', 'close_day', 'due_day'];
 

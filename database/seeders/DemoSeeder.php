@@ -9,7 +9,9 @@ use App\Models\CreditCard;
 use App\Models\Goal;
 use App\Models\Transaction;
 use App\Models\Transfer;
+use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * Dados de demonstração dos últimos 6 meses, relativos à data de hoje.
@@ -17,8 +19,20 @@ use Illuminate\Database\Seeder;
  */
 class DemoSeeder extends Seeder
 {
+    public const EMAIL = 'demo@financeflow.test';
+
+    public const PASSWORD = 'demo1234';
+
     public function run(): void
     {
+        // Os dados nascem do usuário de demonstração (login: demo@financeflow.test / demo1234).
+        $demo = User::firstOrCreate(
+            ['email' => self::EMAIL],
+            ['name' => 'Demo', 'password' => self::PASSWORD],
+        );
+
+        Auth::login($demo);
+
         $category = Category::pluck('id', 'name');
 
         $checking = Account::create(['name' => 'Conta corrente', 'type' => 'Conta corrente', 'institution' => 'Banco principal', 'note' => 'Recebe o salário', 'opening_balance' => 1500]);

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToUser;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -12,7 +13,7 @@ use Illuminate\Support\Carbon;
 
 class Transaction extends Model
 {
-    use HasFactory;
+    use BelongsToUser, HasFactory;
 
     protected $fillable = ['description', 'amount', 'date', 'category_id', 'account_id', 'credit_card_id'];
 

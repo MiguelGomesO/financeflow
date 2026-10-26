@@ -4,6 +4,7 @@ namespace App\Livewire\Forms;
 
 use App\Support\Money;
 use Closure;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Livewire\Form;
 
@@ -38,7 +39,7 @@ class DepositForm extends Form
                         $fail('Informe um valor maior que zero, ex.: 200,00.');
                     }
                 }],
-                'account' => ['nullable', Rule::exists('accounts', 'id')],
+                'account' => ['nullable', Rule::exists('accounts', 'id')->where('user_id', Auth::id())],
                 'date' => ['required', 'date_format:Y-m-d'],
             ],
             [

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToUser;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -10,7 +11,7 @@ use Illuminate\Support\Carbon;
 
 class Budget extends Model
 {
-    use HasFactory;
+    use BelongsToUser, HasFactory;
 
     protected $fillable = ['category_id', 'month', 'limit'];
 
