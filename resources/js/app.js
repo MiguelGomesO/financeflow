@@ -1,6 +1,7 @@
 import './bootstrap';
 import axios from 'axios';
 import datePicker from './date-picker';
+import './tooltip';
 
 window.axios = axios;
 
