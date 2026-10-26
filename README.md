@@ -1,59 +1,93 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# FinanceFlow
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Aplicativo web de finanças pessoais: acompanhe contas, cartões de crédito, gastos por categoria, orçamentos e metas de economia, tudo em reais (R$).
 
-## About Laravel
+## Funcionalidades
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- **Visão geral** – saldo, entradas e saídas do período, gastos por categoria, orçamentos, metas e transações recentes.
+- **Transações** – receitas e despesas por conta ou cartão, com filtros por mês, texto, tipo e categoria, e totais do mês.
+- **Orçamentos** – limite mensal por categoria, com alerta ao se aproximar do teto.
+- **Metas** – objetivos de economia com prazo, depósitos e quanto guardar por mês.
+- **Contas e cartões** – saldo das contas, transferências entre contas e cartões de crédito com:
+  - fatura em aberto calculada pelo ciclo de fechamento (ou informada à mão pelo botão **+**);
+  - limite usado informado à mão, quando o banco mostra um valor diferente da soma das compras;
+  - selos dos principais bancos e fintechs (veja [Logos dos bancos](#logos-dos-bancos)).
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Tecnologias
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- PHP 8.2+ e [Laravel 12](https://laravel.com)
+- [Livewire 4](https://livewire.laravel.com) e Alpine.js
+- [Tailwind CSS 4](https://tailwindcss.com) com [Vite](https://vitejs.dev)
+- SQLite, MySQL ou qualquer banco suportado pelo Laravel
 
-## Learning Laravel
+## Requisitos
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+- PHP 8.2 ou superior (com as extensões usuais do Laravel)
+- [Composer](https://getcomposer.org)
+- Node.js e npm
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Instalação
 
-## Laravel Sponsors
+```bash
+git clone <url-do-repositorio> financeflow
+cd financeflow
+composer setup
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+O `composer setup` instala as dependências, cria o `.env` a partir do `.env.example`, gera a chave da aplicação, roda as migrations e compila os assets.
 
-### Premium Partners
+Por padrão o `.env.example` usa SQLite. Para usar MySQL, ajuste no `.env` antes das migrations:
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=financeflow
+DB_USERNAME=root
+DB_PASSWORD=
+```
 
-## Contributing
+Em seguida rode `php artisan migrate`.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Executando
 
-## Code of Conduct
+```bash
+composer dev
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Sobe o servidor (`http://localhost:8000`), a fila, os logs e o Vite. Se preferir, rode só o essencial em dois terminais:
 
-## Security Vulnerabilities
+```bash
+php artisan serve
+npm run dev
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### Dados de demonstração
 
-## License
+Para preencher o app com contas, cartões, transações dos últimos 6 meses, orçamentos e metas:
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```bash
+php artisan db:seed --class=DemoSeeder
+```
+
+## Testes
+
+```bash
+php artisan test
+```
+
+## Logos dos bancos
+
+Os selos usam a cor e a sigla de cada banco (lista em `app/Support/Banks.php`). Para usar o logo oficial, coloque o arquivo em `public/images/banks/` com o nome do banco, por exemplo `nubank.svg`, `itau.png` ou `banco-do-brasil.svg`; ele substitui o selo automaticamente. Os logos são marcas dos respectivos bancos e não vêm no repositório.
+
+## Estrutura
+
+| Pasta | Conteúdo |
+| --- | --- |
+| `app/Livewire` | Páginas e formulários (Dashboard, Transações, Orçamentos, Metas, Contas) |
+| `app/Models` | Modelos Eloquent (contas, cartões, transações, orçamentos, metas) |
+| `app/Support` | Regras e utilitários (dinheiro, datas, bancos, status de orçamento) |
+| `resources/views` | Views Blade e componentes |
+| `resources/js` | Alpine, incluindo o calendário próprio (`date-picker.js`) |
+| `database/seeders` | Dados de demonstração |
+| `tests` | Testes de feature e unitários |
