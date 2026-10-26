@@ -7,11 +7,11 @@
 
         <div class="flex flex-wrap items-center gap-2.5">
             <label for="month" class="text-sm text-muted">Mês</label>
-            <select id="month" wire:model.live="month" class="input w-auto">
+            <x-ui.select id="month" wire:model.live="month" class="input w-auto">
                 @foreach ($months as $value => $label)
                     <option value="{{ $value }}">{{ $label }}</option>
                 @endforeach
-            </select>
+            </x-ui.select>
 
             <button
                 type="button"

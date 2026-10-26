@@ -9,17 +9,17 @@
         <form wire:submit="save" class="flex flex-col gap-4">
             @unless ($editing)
                 <x-ui.field label="Categoria" for="budget-category" error="form.categoryId">
-                    <select
+                    <x-ui.select
                         id="budget-category"
                         wire:model="form.categoryId"
                         class="input"
-                        @error('form.categoryId') aria-invalid="true" aria-describedby="budget-category-error" @enderror
+                        :aria-invalid="$errors->has('form.categoryId') ? 'true' : null" :aria-describedby="$errors->has('form.categoryId') ? 'budget-category-error' : null"
                     >
                         <option value="">Escolha uma categoria</option>
                         @foreach ($available as $category)
                             <option value="{{ $category->id }}">{{ $category->name }}</option>
                         @endforeach
-                    </select>
+                    </x-ui.select>
                 </x-ui.field>
             @endunless
 

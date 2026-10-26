@@ -9,11 +9,11 @@
 
         <div class="flex flex-wrap items-center gap-2.5">
             <label for="period" class="text-sm text-muted">Período</label>
-            <select id="period" wire:model.live="period" class="input w-auto">
+            <x-ui.select id="period" wire:model.live="period" class="input w-auto">
                 @foreach ($periods as $value => $label)
                     <option value="{{ $value }}">{{ $label }}</option>
                 @endforeach
-            </select>
+            </x-ui.select>
 
             <button
                 type="button"

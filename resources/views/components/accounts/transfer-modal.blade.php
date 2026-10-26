@@ -4,19 +4,19 @@
 <x-ui.modal name="transfer" title="Transferir entre contas">
     <form wire:submit="saveTransfer" class="flex flex-col gap-4">
         <x-ui.field label="De" for="transfer-from" error="transfer.from">
-            <select id="transfer-from" wire:model="transfer.from" class="input">
+            <x-ui.select id="transfer-from" wire:model="transfer.from" class="input">
                 @foreach ($accounts as $account)
                     <option value="{{ $account->id }}">{{ $account->name }} — {{ Money::brl($account->balance) }}</option>
                 @endforeach
-            </select>
+            </x-ui.select>
         </x-ui.field>
 
         <x-ui.field label="Para" for="transfer-to" error="transfer.to">
-            <select id="transfer-to" wire:model="transfer.to" class="input">
+            <x-ui.select id="transfer-to" wire:model="transfer.to" class="input">
                 @foreach ($accounts as $account)
                     <option value="{{ $account->id }}">{{ $account->name }}</option>
                 @endforeach
-            </select>
+            </x-ui.select>
         </x-ui.field>
 
         <div class="grid grid-cols-2 gap-3">

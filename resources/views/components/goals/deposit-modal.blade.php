@@ -29,12 +29,12 @@
         </div>
 
         <x-ui.field label="Guardado em" for="deposit-account" error="deposit.account">
-            <select id="deposit-account" wire:model="deposit.account" class="input">
+            <x-ui.select id="deposit-account" wire:model="deposit.account" class="input">
                 <option value="">Não informar</option>
                 @foreach ($accounts as $account)
                     <option value="{{ $account->id }}">{{ $account->name }}</option>
                 @endforeach
-            </select>
+            </x-ui.select>
         </x-ui.field>
 
         <p class="-mt-2 text-[13px] text-muted">O depósito reserva o dinheiro para a meta; o saldo da conta não muda.</p>

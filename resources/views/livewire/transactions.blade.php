@@ -9,21 +9,13 @@
 
         <div class="flex flex-wrap items-center gap-2.5">
             <label for="month" class="text-sm text-muted">Mês</label>
-            <select id="month" wire:model.live="month" class="input w-auto">
+            <x-ui.select id="month" wire:model.live="month" class="input w-auto">
                 @foreach ($months as $value => $label)
                     <option value="{{ $value }}">{{ $label }}</option>
                 @endforeach
-            </select>
+            </x-ui.select>
 
-            <button
-                type="button"
-                disabled
-                title="Em breve"
-                class="inline-flex min-h-11 cursor-not-allowed items-center gap-2 rounded-xl border border-line-strong bg-white px-[18px] font-semibold text-ink opacity-60"
-            >
-                <x-icon name="download" class="size-[18px]" />
-                Importar extrato
-            </button>
+            <livewire:import />
 
             <a
                 href="#nova-transacao"

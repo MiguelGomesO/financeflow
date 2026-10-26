@@ -7,6 +7,7 @@ Aplicativo web de finanças pessoais: acompanhe contas, cartões de crédito, ga
 - **Contas de usuário** – cadastro, login (com limite de tentativas) e logout. Cada usuário só enxerga e altera os próprios dados: contas, cartões, transações, orçamentos, metas e transferências são filtrados por usuário em todas as consultas, e há testes de isolamento entre usuários.
 - **Visão geral** – saldo, entradas e saídas do período, gastos por categoria, orçamentos, metas e transações recentes.
 - **Transações** – receitas e despesas por conta ou cartão, com filtros por mês, texto, tipo e categoria, e totais do mês.
+- **Importar extrato** – na página de Transações, envie o extrato ou a fatura do banco em Excel (.xlsx/.xls), PDF (com texto selecionável) ou OFX, para uma conta ou cartão. O app mostra uma prévia, sugere a categoria pelo seu histórico, desmarca o que já foi lançado antes e só salva o que você confirmar. Planilhas precisam de uma linha de cabeçalho com Data e Valor (ou Crédito e Débito); em PDF, vale cada linha que começa com a data e traz um valor em R$.
 - **Recorrentes** – lançamentos que se repetem todo mês (salário, aluguel, assinaturas), em conta ou cartão, com data de início e fim opcional e opção de pausar. O app cria os lançamentos no dia certo, sem duplicar, e dias 29 a 31 usam o último dia de meses curtos.
 - **Orçamentos** – limite mensal por categoria, com alerta ao se aproximar do teto.
 - **Metas** – objetivos de economia com prazo, depósitos e quanto guardar por mês.

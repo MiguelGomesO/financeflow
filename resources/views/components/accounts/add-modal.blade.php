@@ -53,11 +53,11 @@
         @else
             <div class="grid grid-cols-2 gap-3">
                 <x-ui.field label="Tipo" for="account-type" error="form.type">
-                    <select id="account-type" wire:model="form.type" class="input px-2.5">
+                    <x-ui.select id="account-type" wire:model="form.type" class="input px-2.5">
                         @foreach ($types as $type)
                             <option value="{{ $type }}">{{ $type }}</option>
                         @endforeach
-                    </select>
+                    </x-ui.select>
                 </x-ui.field>
 
                 <x-ui.field :label="$editing ? 'Saldo inicial (R$)' : 'Saldo atual (R$)'" for="account-balance" error="form.balance">

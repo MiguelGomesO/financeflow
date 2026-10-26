@@ -48,15 +48,15 @@
 
             <div class="grid grid-cols-2 gap-3">
                 <x-ui.field label="Categoria" for="rec-category" error="form.categoryId">
-                    <select id="rec-category" wire:model="form.categoryId" class="input px-2.5">
+                    <x-ui.select id="rec-category" wire:model="form.categoryId" class="input px-2.5">
                         @foreach ($categories as $category)
                             <option value="{{ $category->id }}">{{ $category->name }}</option>
                         @endforeach
-                    </select>
+                    </x-ui.select>
                 </x-ui.field>
 
                 <x-ui.field :label="$type === 'income' ? 'Entra em' : 'Pago com'" for="rec-source" error="form.source">
-                    <select id="rec-source" wire:model="form.source" class="input px-2.5">
+                    <x-ui.select id="rec-source" wire:model="form.source" class="input px-2.5">
                         <optgroup label="Contas">
                             @foreach ($accounts as $account)
                                 <option value="account:{{ $account->id }}">{{ $account->name }}</option>
@@ -69,7 +69,7 @@
                                 @endforeach
                             </optgroup>
                         @endif
-                    </select>
+                    </x-ui.select>
                 </x-ui.field>
             </div>
 
