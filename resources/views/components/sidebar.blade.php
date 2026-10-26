@@ -51,16 +51,17 @@
         <x-sidebar.link :href="route('accounts')" icon="card" :active="request()->routeIs('accounts')">Contas e cartões</x-sidebar.link>
     </nav>
 
-    {{-- Só a foto; ao clicar abre o menu do perfil (renderizado fora do menu lateral, que corta o que passa da borda). --}}
-    <div class="mt-auto flex justify-center">
+    {{-- Menu aberto: foto e nome. Recolhido: só a foto. Ao clicar abre o menu do perfil (renderizado fora do menu lateral, que corta o que passa da borda). --}}
+    <div class="mt-auto flex" x-bind:class="{ 'lg:justify-center': sidebarCollapsed }">
         <button
             type="button"
             data-profile
-            class="rounded-full ring-2 ring-transparent transition hover:ring-mint focus-visible:ring-mint focus:outline-none"
-            aria-label="Menu do perfil"
+            class="flex min-w-0 items-center gap-3 rounded-2xl p-1.5 text-left transition-colors hover:bg-ink-800 focus-visible:bg-ink-800 focus:outline-none"
+            x-bind:class="{ 'lg:w-auto lg:rounded-full lg:p-0 lg:hover:bg-transparent': sidebarCollapsed, 'w-full': !sidebarCollapsed }"
+            aria-label="Menu do perfil de {{ auth()->user()?->name }}"
             aria-haspopup="menu"
             x-bind:aria-expanded="profileOpen"
-            title="{{ auth()->user()?->name }}"
+            x-bind:title="sidebarCollapsed ? @js(auth()->user()?->name) : null"
             x-on:click="
                 profileOpen = !profileOpen;
                 if (profileOpen) {
@@ -70,6 +71,11 @@
             "
         >
             <x-avatar :user="auth()->user()" class="size-11 text-sm" />
+
+            <span class="flex min-w-0 flex-1 flex-col" x-bind:class="{ 'lg:hidden': sidebarCollapsed }">
+                <span class="truncate font-semibold text-white">{{ auth()->user()?->name }}</span>
+                <span class="truncate text-[13px] text-on-ink-muted">{{ auth()->user()?->email }}</span>
+            </span>
         </button>
     </div>
 </aside>
