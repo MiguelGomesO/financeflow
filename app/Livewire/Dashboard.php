@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Queries\DashboardQuery;
+use App\Services\RecurringGenerator;
 use App\Support\Dates;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
@@ -28,8 +29,11 @@ class Dashboard extends Component
     #[Url]
     public string $period = 'month';
 
-    public function mount(): void
+    public function mount(RecurringGenerator $recurring): void
     {
+        // Garante os lançamentos recorrentes em dia mesmo sem o agendador rodando.
+        $recurring->run();
+
         $this->normalizePeriod();
     }
 

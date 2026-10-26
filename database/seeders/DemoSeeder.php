@@ -7,6 +7,7 @@ use App\Models\Budget;
 use App\Models\Category;
 use App\Models\CreditCard;
 use App\Models\Goal;
+use App\Models\RecurringTransaction;
 use App\Models\Transaction;
 use App\Models\Transfer;
 use App\Models\User;
@@ -113,6 +114,25 @@ class DemoSeeder extends Seeder
             ['Notebook novo', 4500, 3, 3150, 450, $checking],
             ['Entrada do apartamento', 60000, 50, 11100, 900, $checking],
         ];
+
+        // Recorrências de exemplo. Os meses passados já estão nas transações acima,
+        // então elas só passam a lançar daqui para frente (generated_until = hoje).
+        foreach ([
+            ['Salário', 'Renda', $checking, 7500, 5],
+            ['Aluguel', 'Moradia', $checking, -1800, 10],
+            ['Streaming', 'Assinaturas', $spareCard, -55.90, 2],
+        ] as [$description, $categoryName, $source, $amount, $day]) {
+            RecurringTransaction::create([
+                'description' => $description,
+                'amount' => $amount,
+                'category_id' => $category[$categoryName],
+                'account_id' => $source instanceof Account ? $source->id : null,
+                'credit_card_id' => $source instanceof CreditCard ? $source->id : null,
+                'day_of_month' => $day,
+                'starts_on' => $today->copy()->subMonths(6)->startOfMonth()->toDateString(),
+                'generated_until' => $today->toDateString(),
+            ]);
+        }
 
         foreach ($goals as [$name, $target, $months, $initial, $recent, $account]) {
             $goal = Goal::create(['name' => $name, 'target' => $target, 'due_month' => $today->copy()->addMonths($months)->format('Y-m')]);

@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\Category;
 use App\Models\Transaction;
+use App\Services\RecurringGenerator;
 use App\Support\Dates;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
@@ -38,8 +39,10 @@ class Transactions extends Component
     #[Url(except: '')]
     public string $category = '';
 
-    public function mount(): void
+    public function mount(RecurringGenerator $recurring): void
     {
+        $recurring->run();
+
         $this->normalizeFilters();
     }
 
