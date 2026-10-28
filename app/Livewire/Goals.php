@@ -11,10 +11,13 @@ use App\Support\GoalProgress;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Title;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 #[Title('Metas · FinanceFlow')]
 class Goals extends Component
 {
+    use WithPagination;
+
     public GoalForm $form;
 
     public DepositForm $deposit;
@@ -140,16 +143,14 @@ class Goals extends Component
             ->with(['goal:id,name', 'account:id,name'])
             ->orderByDesc('date')
             ->orderByDesc('id')
-            ->limit(10)
-            ->get()
-            ->map(fn (GoalDeposit $d) => [
+            ->paginate(10)
+            ->through(fn (GoalDeposit $d) => [
                 'id' => $d->id,
                 'date' => $d->date->toDateString(),
                 'goal' => $d->goal->name,
                 'account' => $d->account?->name,
                 'amount' => $d->amount,
-            ])
-            ->all();
+            ]);
 
         return view('livewire.goals', [
             'items' => $goals->all(),

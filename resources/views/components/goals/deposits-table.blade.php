@@ -3,7 +3,7 @@
 @props(['deposits'])
 
 <x-ui.card title="Últimos depósitos">
-    @if (empty($deposits))
+    @if ($deposits->isEmpty())
         <p class="py-6 text-center text-muted">Nenhum depósito ainda.</p>
     @else
         <div class="-mx-2 overflow-x-auto">
@@ -41,5 +41,11 @@
                 </tbody>
             </table>
         </div>
+
+        @if ($deposits->hasPages())
+            <div class="pt-2">
+                {{ $deposits->links() }}
+            </div>
+        @endif
     @endif
 </x-ui.card>
