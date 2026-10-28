@@ -8,6 +8,26 @@ namespace App\Support;
  */
 class BudgetStatus
 {
+    /** Faixas de alerta, em % do limite: avisa ao chegar em 80% e de novo ao atingir 100%. */
+    public const ALERT_LEVELS = [100, 80];
+
+    /** Maior faixa de alerta alcançada (100, 80) ou 0 se ainda está abaixo de todas. */
+    public static function alertLevel(float $spent, float $limit): int
+    {
+        if ($limit <= 0) {
+            return 0;
+        }
+
+        foreach (self::ALERT_LEVELS as $level) {
+            // Compara em centavos para 80,00 de 100,00 contar como 80% sem erro de ponto flutuante.
+            if (round($spent * 100) * 100 >= round($limit * 100) * $level) {
+                return $level;
+            }
+        }
+
+        return 0;
+    }
+
     public static function for(float $spent, float $limit): array
     {
         $ratio = $limit > 0 ? $spent / $limit : 0;

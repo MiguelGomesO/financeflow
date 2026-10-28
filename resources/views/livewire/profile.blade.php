@@ -115,6 +115,14 @@
                     >
                 </x-ui.field>
 
+                <label class="flex min-h-11 cursor-pointer items-start gap-3 text-sm">
+                    <input type="checkbox" wire:model="budgetAlerts" class="mt-0.5 size-5 shrink-0 accent-brand">
+                    <span>
+                        <span class="font-medium">Avisos de orçamento por e-mail</span>
+                        <span class="block text-[13px] text-muted">Receba um e-mail ao chegar a 80% e a 100% do limite de uma categoria.</span>
+                    </span>
+                </label>
+
                 <button
                     type="submit"
                     class="min-h-12 rounded-xl bg-brand font-semibold text-white hover:bg-brand-dark disabled:opacity-60"

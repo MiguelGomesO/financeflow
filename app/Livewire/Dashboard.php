@@ -69,6 +69,7 @@ class Dashboard extends Component
             ],
             'months' => $months,
             'budgets' => $query->budgets(),
+            'budgetAlerts' => $query->budgetAlerts(),
             'transactions' => $query->recentTransactions(),
             'goals' => $query->goals(),
         ]);

@@ -17,7 +17,7 @@ class Budget extends Model
 
     protected function casts(): array
     {
-        return ['limit' => 'float'];
+        return ['limit' => 'float', 'alert_level' => 'integer'];
     }
 
     public function category(): BelongsTo

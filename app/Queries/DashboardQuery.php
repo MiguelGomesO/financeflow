@@ -6,6 +6,7 @@ use App\Models\Account;
 use App\Models\Budget;
 use App\Models\Goal;
 use App\Models\Transaction;
+use App\Support\BudgetStatus;
 use App\Support\Dates;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
@@ -91,6 +92,28 @@ class DashboardQuery
                 'spent' => (float) $b->spent,
                 'limit' => $b->limit,
             ])
+            ->values()
+            ->all();
+    }
+
+    /** Orçamentos do mês que chegaram a 80% ou 100% do limite, os mais consumidos primeiro. */
+    public function budgetAlerts(): array
+    {
+        $month = $this->today->format('Y-m');
+
+        return Budget::query()
+            ->with('category:id,name')
+            ->withSpent($month)
+            ->where('month', $month)
+            ->get()
+            ->map(fn (Budget $b) => [
+                'name' => $b->category->name,
+                'spent' => (float) $b->spent,
+                'limit' => $b->limit,
+                'level' => BudgetStatus::alertLevel((float) $b->spent, $b->limit),
+            ])
+            ->filter(fn (array $a) => $a['level'] > 0)
+            ->sortByDesc(fn (array $a) => $a['spent'] / $a['limit'])
             ->values()
             ->all();
     }

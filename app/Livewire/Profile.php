@@ -23,6 +23,9 @@ class Profile extends Component
 
     public string $email = '';
 
+    /** Receber e-mail quando um orçamento chegar a 80% ou 100% do limite. */
+    public bool $budgetAlerts = true;
+
     /** Foto escolhida (envio temporário do Livewire). */
     public $photo = null;
 
@@ -36,6 +39,7 @@ class Profile extends Component
     {
         $this->name = $this->user()->name;
         $this->email = $this->user()->email;
+        $this->budgetAlerts = $this->user()->budget_alerts;
     }
 
     public function saveProfile(): void
@@ -54,7 +58,11 @@ class Profile extends Component
             ],
         );
 
-        $this->user()->update(['name' => trim($data['name']), 'email' => $data['email']]);
+        $this->user()->update([
+            'name' => trim($data['name']),
+            'email' => $data['email'],
+            'budget_alerts' => $this->budgetAlerts,
+        ]);
 
         $this->done('Perfil atualizado.');
     }

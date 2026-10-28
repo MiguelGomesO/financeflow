@@ -24,7 +24,11 @@ class User extends Authenticatable
         'email',
         'password',
         'avatar_path',
+        'budget_alerts',
     ];
+
+    /** Mesmo default da coluna, para um usuário recém-criado já vir com os avisos ligados. */
+    protected $attributes = ['budget_alerts' => true];
 
     /** URL da foto de perfil, ou null para mostrar as iniciais. */
     protected function avatarUrl(): Attribute
@@ -51,6 +55,7 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'budget_alerts' => 'boolean',
             'password' => 'hashed',
         ];
     }
