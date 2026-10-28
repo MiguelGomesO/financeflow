@@ -143,8 +143,8 @@ DATA:OFXSGML
 OFX;
 
         $this->assertSame([
-            ['date' => '2026-10-05', 'description' => 'NETFLIX', 'amount' => -45.9],
-            ['date' => '2026-10-06', 'description' => 'SALARIO', 'amount' => 3000.0],
+            ['date' => '2026-10-05', 'description' => 'NETFLIX', 'amount' => -45.9, 'external_id' => '1'],
+            ['date' => '2026-10-06', 'description' => 'SALARIO', 'amount' => 3000.0, 'external_id' => '2'],
         ], (new StatementParser)->parseFile($this->file($ofx, 'ofx'), 'ofx')['rows']);
     }
 

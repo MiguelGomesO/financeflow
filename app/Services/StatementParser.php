@@ -144,7 +144,14 @@ class StatementParser
                 continue;
             }
 
-            $rows[] = ['date' => $date, 'description' => $this->clean($description), 'amount' => $amount];
+            $row = ['date' => $date, 'description' => $this->clean($description), 'amount' => $amount];
+
+            // FITID identifica o lançamento no banco; é o que impede duplicar ao reimportar.
+            if ($fitid = mb_substr($this->ofxField($block, 'FITID'), 0, 64)) {
+                $row['external_id'] = $fitid;
+            }
+
+            $rows[] = $row;
         }
 
         return ['rows' => $rows, 'skipped' => $skipped];

@@ -18,6 +18,11 @@
                 <p class="font-display text-xl font-semibold">
                     {{ $done['imported'] }} {{ $done['imported'] === 1 ? 'lançamento importado' : 'lançamentos importados' }}
                 </p>
+                @if ($done['skipped'] > 0)
+                    <p class="text-sm">
+                        {{ $done['skipped'] }} {{ $done['skipped'] === 1 ? 'lançamento foi ignorado' : 'lançamentos foram ignorados' }} por já existir{{ $done['skipped'] === 1 ? '' : 'em' }} nesta conta.
+                    </p>
+                @endif
                 <button type="button" x-on:click="$dispatch('close-modal', { name: 'import' })" class="min-h-11 rounded-xl bg-brand px-[18px] font-semibold text-white hover:bg-brand-dark">
                     Concluir
                 </button>
@@ -96,6 +101,14 @@
                 </p>
             @endif
 
+            @php($flagged = collect($rows)->filter(fn ($row) => $row['duplicate'] || $row['similarTo'] !== null)->count())
+            @if ($flagged > 0)
+                <p class="rounded-xl bg-expense-faint px-4 py-3 text-sm text-expense-dark" role="status">
+                    <strong>{{ $flagged }}</strong> {{ $flagged === 1 ? 'linha parece já ter sido lançada e foi desmarcada' : 'linhas parecem já ter sido lançadas e foram desmarcadas' }}.
+                    Marque de volta as que forem compras diferentes.
+                </p>
+            @endif
+
             <div class="flex flex-wrap gap-x-4 gap-y-1 text-sm">
                 <button type="button" wire:click="toggleAll(true)" class="font-semibold text-brand hover:text-brand-dark">Marcar todos</button>
                 <button type="button" wire:click="toggleAll(false)" class="font-semibold text-brand hover:text-brand-dark">Desmarcar todos</button>
@@ -119,6 +132,8 @@
                             <span class="truncate font-medium" title="{{ $row['description'] }}">{{ $row['description'] }}</span>
                             @if ($row['duplicate'])
                                 <span class="text-xs font-semibold text-expense-dark">Parece já lançado</span>
+                            @elseif ($row['similarTo'])
+                                <span class="truncate text-xs font-semibold text-expense-dark" title="{{ $row['similarTo'] }}">Parecido com “{{ $row['similarTo'] }}”</span>
                             @elseif ($row['error'])
                                 <span class="text-xs font-semibold text-expense-dark">{{ $row['error'] }}</span>
                             @endif

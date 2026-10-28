@@ -7,6 +7,8 @@ use App\Models\Category;
 use App\Models\CreditCard;
 use App\Models\Transaction;
 use App\Services\StatementParser;
+use App\Support\DescriptionMatch;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 use Livewire\Component;
@@ -17,6 +19,9 @@ class Import extends Component
     use WithFileUploads;
 
     public const MAX_ROWS = 500;
+
+    /** Diferença de dias aceita para considerar um lançamento parecido com outro já feito. */
+    public const SIMILAR_DAYS = 3;
 
     public $file = null;
 
@@ -29,12 +34,12 @@ class Import extends Component
     /** Lançamentos lidos do arquivo, sem ajuste de sinal. */
     public array $parsed = [];
 
-    /** Linhas da prévia: date, description, amount, categoryId, selected, duplicate, error. */
+    /** Linhas da prévia: date, description, amount, external_id, categoryId, selected, duplicate, similarTo, error. */
     public array $rows = [];
 
     public int $unreadable = 0;
 
-    /** Resultado da última importação: ['imported' => n]. */
+    /** Resultado da última importação: ['imported' => n, 'skipped' => n]. */
     public ?array $done = null;
 
     public function mount(): void
@@ -105,10 +110,19 @@ class Import extends Component
         [$sourceType, $sourceId] = explode(':', $this->source);
         $categories = Category::pluck('type', 'id');
         $imported = 0;
+        $skipped = 0;
+        $known = $this->knownExternalIds($sourceType, (int) $sourceId);
 
-        DB::transaction(function () use ($sourceType, $sourceId, $categories, &$imported) {
+        DB::transaction(function () use ($sourceType, $sourceId, $categories, $known, &$imported, &$skipped) {
             foreach ($this->rows as $row) {
                 if (! $row['selected'] || $row['error'] !== null) {
+                    continue;
+                }
+
+                // Mesmo código do banco já lançado (prévia antiga, outra aba): nunca entra duas vezes.
+                if ($row['external_id'] !== null && isset($known[$row['external_id']])) {
+                    $skipped++;
+
                     continue;
                 }
 
@@ -125,6 +139,7 @@ class Import extends Component
                     'category_id' => (int) $row['categoryId'],
                     'account_id' => $sourceType === 'account' ? (int) $sourceId : null,
                     'credit_card_id' => $sourceType === 'card' ? (int) $sourceId : null,
+                    'external_id' => $row['external_id'],
                 ]);
 
                 $imported++;
@@ -132,7 +147,7 @@ class Import extends Component
         });
 
         $this->discard();
-        $this->done = ['imported' => $imported];
+        $this->done = ['imported' => $imported, 'skipped' => $skipped];
 
         $this->dispatch('transactions-changed');
     }
@@ -167,40 +182,54 @@ class Import extends Component
         ]);
     }
 
-    /** Monta a prévia: aplica o sinal, sugere a categoria e marca o que já foi lançado antes. */
+    /**
+     * Monta a prévia: aplica o sinal, sugere a categoria e marca o que já foi lançado antes.
+     * Duplicata é o mesmo código do banco (OFX) ou a mesma data, valor e descrição; "parecida" é o
+     * mesmo valor, poucos dias de diferença e descrição semelhante. Nos dois casos a linha vem desmarcada.
+     */
     private function buildRows(): void
     {
-        $duplicates = $this->existingCounts();
         $guesses = $this->categoryGuesses();
         $firstOfType = Category::query()->orderBy('name')->get(['id', 'type'])->groupBy('type')->map(fn ($group) => $group->first()->id);
         $isCard = str_starts_with($this->source, 'card:');
 
-        $this->rows = collect($this->parsed)->map(function (array $row) use (&$duplicates, $guesses, $firstOfType, $isCard) {
+        $rows = collect($this->parsed)->map(function (array $row) use ($guesses, $firstOfType, $isCard) {
             $amount = $this->invert ? -$row['amount'] : $row['amount'];
             $type = $amount > 0 ? 'income' : 'expense';
-            $key = $this->key($row['date'], $amount, $row['description']);
-
-            $duplicate = ($duplicates[$key] ?? 0) > 0;
-            if ($duplicate) {
-                $duplicates[$key]--;
-            }
-
-            $error = $isCard && $type === 'income' ? 'Entrada em cartão (pagamento ou estorno)' : null;
 
             return [
                 'date' => $row['date'],
                 'description' => $row['description'],
                 'amount' => $amount,
+                'external_id' => $row['external_id'] ?? null,
                 'categoryId' => (string) ($guesses[$type][mb_strtolower($row['description'])] ?? $firstOfType[$type] ?? ''),
-                'selected' => ! $duplicate && $error === null,
-                'duplicate' => $duplicate,
-                'error' => $error,
+                'selected' => false,
+                'duplicate' => false,
+                'similarTo' => null,
+                'error' => $isCard && $type === 'income' ? 'Entrada em cartão (pagamento ou estorno)' : null,
             ];
         })->all();
+
+        $existing = $this->existingTransactions();
+
+        // Primeiro as iguais, para uma parecida não "roubar" o lançamento de uma igual.
+        foreach ($rows as $i => $row) {
+            $rows[$i]['duplicate'] = $this->claim($existing, fn (array $e) => $this->sameTransaction($row, $e)) !== null;
+        }
+
+        foreach ($rows as $i => $row) {
+            if (! $rows[$i]['duplicate'] && ($match = $this->claim($existing, fn (array $e) => $this->similarTransaction($row, $e)))) {
+                $rows[$i]['similarTo'] = $match['description'].' · '.Carbon::parse($match['date'])->format('d/m');
+            }
+
+            $rows[$i]['selected'] = ! $rows[$i]['duplicate'] && $rows[$i]['similarTo'] === null && $row['error'] === null;
+        }
+
+        $this->rows = $rows;
     }
 
-    /** Quantos lançamentos iguais (data, valor e descrição) já existem na conta ou cartão. */
-    private function existingCounts(): array
+    /** Lançamentos da conta ou cartão perto das datas do arquivo, cada um podendo casar uma vez só. */
+    private function existingTransactions(): array
     {
         $dates = array_column($this->parsed, 'date');
 
@@ -212,9 +241,68 @@ class Import extends Component
 
         return Transaction::query()
             ->where($sourceType === 'account' ? 'account_id' : 'credit_card_id', $sourceId)
-            ->whereBetween('date', [min($dates), max($dates)])
-            ->get(['date', 'amount', 'description'])
-            ->countBy(fn (Transaction $t) => $this->key($t->date->toDateString(), $t->amount, $t->description))
+            ->whereBetween('date', [
+                Carbon::parse(min($dates))->subDays(self::SIMILAR_DAYS)->toDateString(),
+                Carbon::parse(max($dates))->addDays(self::SIMILAR_DAYS)->toDateString(),
+            ])
+            ->get(['date', 'amount', 'description', 'external_id'])
+            ->map(fn (Transaction $t) => [
+                'date' => $t->date->toDateString(),
+                'amount' => $t->amount,
+                'description' => $t->description,
+                'external_id' => $t->external_id,
+                'used' => false,
+            ])
+            ->all();
+    }
+
+    /** Pega o primeiro lançamento ainda livre que satisfaz o teste e o marca como usado. */
+    private function claim(array &$existing, callable $matches): ?array
+    {
+        foreach ($existing as $i => $candidate) {
+            if (! $candidate['used'] && $matches($candidate)) {
+                $existing[$i]['used'] = true;
+
+                return $candidate;
+            }
+        }
+
+        return null;
+    }
+
+    private function sameTransaction(array $row, array $existing): bool
+    {
+        // Com código do banco dos dois lados, só o código vale: duas compras iguais no mesmo dia têm códigos diferentes.
+        if ($row['external_id'] !== null && $existing['external_id'] !== null) {
+            return $row['external_id'] === $existing['external_id'];
+        }
+
+        return $this->key($row['date'], $row['amount'], $row['description'])
+            === $this->key($existing['date'], $existing['amount'], $existing['description']);
+    }
+
+    private function similarTransaction(array $row, array $existing): bool
+    {
+        if ($row['external_id'] !== null && $existing['external_id'] !== null) {
+            return false;
+        }
+
+        return abs($row['amount'] - $existing['amount']) < 0.005
+            && abs(Carbon::parse($row['date'])->diffInDays(Carbon::parse($existing['date']))) <= self::SIMILAR_DAYS
+            && DescriptionMatch::similar($row['description'], $existing['description']);
+    }
+
+    /** Códigos do banco (já lançados nesta conta ou cartão) entre os das linhas da prévia. */
+    private function knownExternalIds(string $sourceType, int $sourceId): array
+    {
+        $ids = array_values(array_filter(array_column($this->rows, 'external_id')));
+
+        return collect(array_chunk($ids, 500))
+            ->flatMap(fn (array $chunk) => Transaction::query()
+                ->where($sourceType === 'account' ? 'account_id' : 'credit_card_id', $sourceId)
+                ->whereIn('external_id', $chunk)
+                ->pluck('external_id'))
+            ->flip()
             ->all();
     }
 

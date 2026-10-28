@@ -20,6 +20,7 @@ class Transaction extends Model
     protected $fillable = [
         'description', 'amount', 'date', 'category_id', 'account_id', 'credit_card_id',
         'installment_group', 'installment_number', 'installment_total', 'attachment_path',
+        'external_id',
     ];
 
     protected static function booted(): void
