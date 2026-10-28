@@ -15,12 +15,18 @@
             </thead>
             <tbody>
                 @forelse ($transactions as $transaction)
-                    <tr wire:key="tx-{{ $transaction['id'] }}" class="border-t border-mist">
+                    {{-- A linha inteira abre a edição; o botão da descrição serve ao teclado e a leitores de tela. --}}
+                    <tr
+                        wire:key="tx-{{ $transaction['id'] }}"
+                        x-on:click="$dispatch('edit-transaction', { id: {{ $transaction['id'] }} })"
+                        data-tooltip="Clique para editar"
+                        class="cursor-pointer border-t border-mist hover:bg-mist/60"
+                    >
                         <td class="px-2 py-1.5">
                             <button
                                 type="button"
-                                x-on:click="$dispatch('edit-transaction', { id: {{ $transaction['id'] }} })"
-                                class="-mx-1.5 min-h-9 rounded-lg px-1.5 text-left font-medium hover:bg-mist hover:underline"
+                                x-on:click.stop="$dispatch('edit-transaction', { id: {{ $transaction['id'] }} })"
+                                class="-mx-1.5 min-h-9 rounded-lg px-1.5 text-left font-medium"
                                 aria-label="Editar {{ $transaction['description'] }}"
                             >
                                 {{ $transaction['description'] }}

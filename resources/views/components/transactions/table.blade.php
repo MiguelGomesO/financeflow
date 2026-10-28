@@ -14,14 +14,19 @@
         </thead>
         <tbody>
             @foreach ($rows as $row)
-                <tr wire:key="tx-{{ $row->id }}" class="border-t border-mist">
+                {{-- A linha inteira abre a edição; o botão da descrição serve ao teclado e a leitores de tela. --}}
+                <tr
+                    wire:key="tx-{{ $row->id }}"
+                    x-on:click="$dispatch('edit-transaction', { id: {{ $row->id }} })"
+                    data-tooltip="Clique para editar"
+                    class="cursor-pointer border-t border-mist hover:bg-mist/60"
+                >
                     <td class="px-2 py-3 text-muted tabular-nums">{{ $row->date->format('d/m') }}</td>
                     <td class="px-2 py-1.5">
-                        {{-- Clicar na descrição abre a edição. --}}
                         <button
                             type="button"
-                            x-on:click="$dispatch('edit-transaction', { id: {{ $row->id }} })"
-                            class="-mx-1.5 min-h-9 rounded-lg px-1.5 text-left font-medium hover:bg-mist hover:underline"
+                            x-on:click.stop="$dispatch('edit-transaction', { id: {{ $row->id }} })"
+                            class="-mx-1.5 min-h-9 rounded-lg px-1.5 text-left font-medium"
                             aria-label="Editar {{ $row->description }}"
                         >
                             {{ $row->description }}
