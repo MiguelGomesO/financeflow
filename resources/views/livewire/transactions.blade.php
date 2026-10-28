@@ -65,7 +65,8 @@
     <div class="grid grid-cols-1 items-start gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
         <x-ui.card class="min-w-0">
             <x-transactions.filters :types="$types" :categories="$categories" :tags="$tags" :has-filters="$hasFilters" />
-            <x-transactions.table :rows="$rows" :has-filters="$hasFilters" />
+            <x-transactions.bulk-bar :count="$selectedCount" :total="$rows->total()" :type="$bulkType" :categories="$bulkCategories" :notice="$notice" />
+            <x-transactions.table :rows="$rows" :has-filters="$hasFilters" :selected="$selected" />
         </x-ui.card>
 
         <livewire:create-transaction inline />

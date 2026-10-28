@@ -1,10 +1,26 @@
 @use('App\Support\Money')
-@props(['rows', 'hasFilters' => false])
+@props(['rows', 'hasFilters' => false, 'selected' => []])
 
-<div class="-mx-2 overflow-x-auto" wire:loading.class="opacity-60" wire:target="month,search,type,category,clearFilters,gotoPage,nextPage,previousPage">
+<div class="-mx-2 overflow-x-auto" wire:loading.class="opacity-60" wire:target="month,search,type,category,tag,clearFilters,gotoPage,nextPage,previousPage">
     <table class="w-full min-w-[560px] border-collapse text-sm">
         <thead>
             <tr class="text-left text-[13px] text-muted">
+                <th scope="col" class="w-10 px-2 py-2.5" x-on:click.stop>
+                    {{-- Os ids da página vão num atributo para continuarem certos depois de trocar de página. --}}
+                    <input
+                        type="checkbox"
+                        aria-label="Marcar todas desta página"
+                        class="size-[18px] cursor-pointer accent-brand"
+                        data-ids="{{ $rows->pluck('id')->map(fn ($id) => (string) $id)->toJson() }}"
+                        x-bind:checked="JSON.parse($el.dataset.ids).length > 0 && JSON.parse($el.dataset.ids).every((id) => $wire.selected.includes(id))"
+                        x-on:change="
+                            const ids = JSON.parse($el.dataset.ids);
+                            $wire.$set('selected', $el.checked
+                                ? [...new Set([...$wire.selected, ...ids])]
+                                : $wire.selected.filter((id) => ! ids.includes(id)))
+                        "
+                    >
+                </th>
                 <th scope="col" class="px-2 py-2.5 font-medium">Data</th>
                 <th scope="col" class="px-2 py-2.5 font-medium">Descrição</th>
                 <th scope="col" class="px-2 py-2.5 font-medium">Categoria</th>
@@ -19,8 +35,20 @@
                     wire:key="tx-{{ $row->id }}"
                     x-on:click="$dispatch('edit-transaction', { id: {{ $row->id }} })"
                     data-tooltip="Clique para editar"
-                    class="cursor-pointer border-t border-mist hover:bg-mist/60"
+                    @class([
+                        'cursor-pointer border-t border-mist hover:bg-mist/60',
+                        'bg-brand-light/50' => in_array((string) $row->id, $selected, true),
+                    ])
                 >
+                    <td class="px-2 py-3" x-on:click.stop>
+                        <input
+                            type="checkbox"
+                            wire:model.live="selected"
+                            value="{{ $row->id }}"
+                            aria-label="Marcar {{ $row->description }}"
+                            class="size-[18px] cursor-pointer accent-brand"
+                        >
+                    </td>
                     <td class="px-2 py-3 text-muted tabular-nums">{{ $row->date->format('d/m') }}</td>
                     <td class="px-2 py-1.5">
                         <button

@@ -46,6 +46,18 @@ class Transactions extends Component
     #[Url(except: '')]
     public string $tag = '';
 
+    /** Quantas transações dá para marcar de uma vez. */
+    public const MAX_SELECTION = 1000;
+
+    /** Ids marcados (texto, como vêm dos checkboxes). */
+    public array $selected = [];
+
+    /** Categoria escolhida para a troca em massa. */
+    public string $bulkCategory = '';
+
+    /** Aviso do resultado da última ação em massa. */
+    public ?string $notice = null;
+
     public function mount(RecurringGenerator $recurring): void
     {
         $recurring->run();
@@ -55,9 +67,12 @@ class Transactions extends Component
 
     public function updated(string $property): void
     {
+        $this->notice = null;
+
         if (in_array($property, ['month', 'search', 'type', 'category', 'tag'], true)) {
             $this->normalizeFilters();
             $this->resetPage();
+            $this->clearSelection();
         }
     }
 
@@ -65,6 +80,59 @@ class Transactions extends Component
     {
         $this->reset('search', 'type', 'category', 'tag');
         $this->resetPage();
+        $this->clearSelection();
+    }
+
+    public function clearSelection(): void
+    {
+        $this->reset('selected', 'bulkCategory');
+        $this->resetErrorBag();
+    }
+
+    /** Marca as transações do filtro atual (todas as páginas), até o limite. */
+    public function selectFiltered(): void
+    {
+        $this->selected = $this->filteredQuery()
+            ->latestFirst()
+            ->limit(self::MAX_SELECTION)
+            ->pluck('id')
+            ->map(fn ($id) => (string) $id)
+            ->all();
+        $this->notice = null;
+    }
+
+    public function deleteSelected(): void
+    {
+        $ids = $this->selectedIds();
+
+        // Pelo model, para comprovantes sem uso serem apagados junto.
+        foreach (array_chunk($ids, 500) as $chunk) {
+            Transaction::whereKey($chunk)->get()->each->delete();
+        }
+
+        $this->finishBulk(count($ids) === 1 ? '1 transação excluída.' : count($ids).' transações excluídas.');
+    }
+
+    /** Move as marcadas para a categoria escolhida; ela precisa ser do tipo (despesa ou receita) delas. */
+    public function categorizeSelected(): void
+    {
+        $ids = $this->selectedIds();
+        $type = $this->selectionType($ids);
+        $category = $type === null ? null : Category::query()->ofType($type)->whereKey((int) $this->bulkCategory)->first();
+
+        if ($ids === [] || $category === null) {
+            $this->addError('bulkCategory', 'Escolha uma categoria para o tipo selecionado.');
+
+            return;
+        }
+
+        foreach (array_chunk($ids, 500) as $chunk) {
+            Transaction::whereKey($chunk)->update(['category_id' => $category->id]);
+        }
+
+        $this->finishBulk(count($ids) === 1
+            ? "1 transação movida para {$category->name}."
+            : count($ids)." transações movidas para {$category->name}.");
     }
 
     /** Baixa as transações do mês com os filtros atuais (todas, sem paginar). */
@@ -101,7 +169,10 @@ class Transactions extends Component
 
     /** Recarrega a lista quando uma transação é criada, editada ou excluída. */
     #[On('transactions-changed')]
-    public function refreshList(): void {}
+    public function refreshList(): void
+    {
+        $this->selected = array_map('strval', $this->selectedIds());
+    }
 
     public function render()
     {
@@ -110,7 +181,13 @@ class Transactions extends Component
         $income = (float) (clone $filtered)->where('amount', '>', 0)->sum('amount');
         $expense = (float) -(clone $filtered)->where('amount', '<', 0)->sum('amount');
 
+        $selectedIds = $this->selectedIds();
+        $bulkType = $this->selectionType($selectedIds);
+
         return view('livewire.transactions', [
+            'selectedCount' => count($selectedIds),
+            'bulkType' => $bulkType,
+            'bulkCategories' => $bulkType ? Category::query()->ofType($bulkType)->orderBy('name')->get(['id', 'name']) : collect(),
             'rows' => (clone $filtered)
                 ->with(['category:id,name', 'account:id,name', 'creditCard:id,name', 'tags:id,name'])
                 ->latestFirst()
@@ -126,6 +203,41 @@ class Transactions extends Component
                 'net' => $income - $expense,
             ],
         ]);
+    }
+
+    /** Ids marcados que ainda existem e são do usuário (o navegador pode mandar qualquer coisa). */
+    private function selectedIds(): array
+    {
+        $ids = array_slice(array_values(array_unique(array_map('intval', $this->selected))), 0, self::MAX_SELECTION);
+
+        return collect(array_chunk($ids, 500))
+            ->flatMap(fn (array $chunk) => Transaction::whereKey($chunk)->pluck('id'))
+            ->map(fn ($id) => (int) $id)
+            ->all();
+    }
+
+    /** "expense" se todas são saídas, "income" se todas são entradas, null se misturou (ou nada marcado). */
+    private function selectionType(array $ids): ?string
+    {
+        if ($ids === []) {
+            return null;
+        }
+
+        $amounts = collect(array_chunk($ids, 500))
+            ->flatMap(fn (array $chunk) => Transaction::whereKey($chunk)->pluck('amount'));
+
+        return match (true) {
+            $amounts->every(fn ($amount) => $amount < 0) => 'expense',
+            $amounts->every(fn ($amount) => $amount >= 0) => 'income',
+            default => null,
+        };
+    }
+
+    private function finishBulk(string $notice): void
+    {
+        $this->clearSelection();
+        $this->notice = $notice;
+        $this->dispatch('transactions-changed');
     }
 
     private function filteredQuery(): Builder

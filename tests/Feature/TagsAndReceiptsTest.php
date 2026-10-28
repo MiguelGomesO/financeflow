@@ -15,6 +15,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
+use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -34,7 +35,7 @@ class TagsAndReceiptsTest extends TestCase
         $this->account = Account::factory()->create();
     }
 
-    private function create(array $form = [], ?UploadedFile $file = null): \Livewire\Features\SupportTesting\Testable
+    private function create(array $form = [], ?UploadedFile $file = null): Testable
     {
         $component = Livewire::test(CreateTransaction::class)
             ->set('form.description', 'Almoço')

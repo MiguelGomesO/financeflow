@@ -6,6 +6,7 @@ use App\Livewire\Reports;
 use App\Models\Account;
 use App\Models\Category;
 use App\Models\Transaction;
+use App\Models\User;
 use App\Queries\ReportsQuery;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
@@ -137,7 +138,7 @@ class ReportsTest extends TestCase
     {
         $this->add('Mercado', -300, '2026-10-10');
 
-        $this->actingAs(\App\Models\User::factory()->create());
+        $this->actingAs(User::factory()->create());
 
         $this->get(route('reports'))->assertSee('Nenhum gasto neste período.');
     }
