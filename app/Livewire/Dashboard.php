@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Queries\DashboardQuery;
+use App\Queries\ForecastQuery;
 use App\Services\RecurringGenerator;
 use App\Support\Dates;
 use Livewire\Attributes\On;
@@ -70,6 +71,7 @@ class Dashboard extends Component
             'months' => $months,
             'budgets' => $query->budgets(),
             'budgetAlerts' => $query->budgetAlerts(),
+            'forecast' => (new ForecastQuery(now()))->month(),
             'transactions' => $query->recentTransactions(),
             'goals' => $query->goals(),
         ]);

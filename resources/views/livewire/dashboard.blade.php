@@ -40,6 +40,8 @@
         <x-ui.stat-card label="Economia" :value="$stats['savingsRate'].'%'" hint="da renda guardada" />
     </div>
 
+    <x-dashboard.forecast :forecast="$forecast" />
+
     <div class="grid grid-cols-1 gap-4 xl:grid-cols-2">
         <x-dashboard.cash-flow-chart :months="$months" />
         <x-dashboard.budget-list :budgets="$budgets" />
