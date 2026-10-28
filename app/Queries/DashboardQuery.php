@@ -122,12 +122,15 @@ class DashboardQuery
     {
         return Transaction::query()
             ->with('category:id,name')
+            // Parcelas e lançamentos de datas futuras ainda não aconteceram.
+            ->where('date', '<=', $this->today->toDateString())
             ->latestFirst()
             ->limit($limit)
             ->get()
             ->map(fn (Transaction $t) => [
                 'id' => $t->id,
                 'description' => $t->description,
+                'installment' => $t->installment_label,
                 'category' => $t->category->name,
                 'date' => $t->date->toDateString(),
                 'amount' => $t->amount,

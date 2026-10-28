@@ -6,6 +6,7 @@ use App\Models\Account;
 use App\Models\Category;
 use App\Models\CreditCard;
 use App\Models\Transaction;
+use App\Support\Installments;
 use App\Support\Money;
 use Closure;
 use Illuminate\Validation\Rule;
@@ -27,6 +28,9 @@ class TransactionForm extends Form
     public string $source = '';
 
     public string $date = '';
+
+    /** Número de parcelas (só no cartão e só ao criar); "1" = à vista. */
+    public string $installments = '1';
 
     public function setDefaults(): void
     {
@@ -65,6 +69,14 @@ class TransactionForm extends Form
         }
     }
 
+    /** Parcelas efetivas: só despesa no cartão parcela; nos demais casos vale 1. */
+    public function installmentCount(): int
+    {
+        $onCard = $this->type === 'expense' && str_starts_with($this->source, 'card:');
+
+        return $onCard ? max(1, (int) $this->installments) : 1;
+    }
+
     /** Valida e devolve os atributos do model. */
     public function attributes(): array
     {
@@ -97,7 +109,7 @@ class TransactionForm extends Form
 
     public function clearInputs(): void
     {
-        $this->reset('description', 'amount');
+        $this->reset('description', 'amount', 'installments');
         $this->resetErrorBag();
     }
 
@@ -128,6 +140,7 @@ class TransactionForm extends Form
                 }
             }],
             'date' => ['required', 'date_format:Y-m-d'],
+            'installments' => ['required', 'integer', 'between:1,'.Installments::MAX],
         ];
     }
 
@@ -142,6 +155,7 @@ class TransactionForm extends Form
             'source.required' => 'Escolha uma conta ou cartão.',
             'date.required' => 'Informe a data.',
             'date.date_format' => 'Data inválida.',
+            'installments.*' => 'Escolha de 1 a '.Installments::MAX.' parcelas.',
         ];
     }
 

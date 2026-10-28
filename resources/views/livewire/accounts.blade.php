@@ -62,7 +62,7 @@
         @else
             <div class="grid grid-cols-[repeat(auto-fit,minmax(min(100%,400px),1fr))] gap-4">
                 @foreach ($cards as $card)
-                    <x-accounts.credit-card wire:key="card-{{ $card->id }}" :card="$card" :bill="$bills[$card->id]" :used="$used[$card->id]" />
+                    <x-accounts.credit-card wire:key="card-{{ $card->id }}" :card="$card" :bill="$bills[$card->id]" :used="$used[$card->id]" :upcoming="$upcoming[$card->id]" />
                 @endforeach
             </div>
         @endif

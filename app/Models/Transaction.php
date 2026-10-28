@@ -15,7 +15,10 @@ class Transaction extends Model
 {
     use BelongsToUser, HasFactory;
 
-    protected $fillable = ['description', 'amount', 'date', 'category_id', 'account_id', 'credit_card_id'];
+    protected $fillable = [
+        'description', 'amount', 'date', 'category_id', 'account_id', 'credit_card_id',
+        'installment_group', 'installment_number', 'installment_total',
+    ];
 
     protected function casts(): array
     {
@@ -50,6 +53,12 @@ class Transaction extends Model
     public function getSourceNameAttribute(): ?string
     {
         return $this->account?->name ?? $this->creditCard?->name;
+    }
+
+    /** "2/10" para parcelas de uma compra parcelada; null nas demais. */
+    public function getInstallmentLabelAttribute(): ?string
+    {
+        return $this->installment_group ? "{$this->installment_number}/{$this->installment_total}" : null;
     }
 
     public function scopeBetweenDates(Builder $query, CarbonInterface $start, CarbonInterface $end): void

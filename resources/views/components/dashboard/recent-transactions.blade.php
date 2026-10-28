@@ -30,6 +30,9 @@
                                 aria-label="Editar {{ $transaction['description'] }}"
                             >
                                 {{ $transaction['description'] }}
+                                @if ($transaction['installment'])
+                                    <span class="ml-1 text-[13px] font-normal text-muted tabular-nums">{{ $transaction['installment'] }}</span>
+                                @endif
                             </button>
                         </td>
                         <td class="px-2 py-3">

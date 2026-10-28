@@ -1,5 +1,5 @@
 @use('App\Support\Money')
-@props(['card', 'bill', 'used'])
+@props(['card', 'bill', 'used', 'upcoming' => []])
 
 @php
     $usedPercent = $card->limit > 0 ? max(0, $used) / $card->limit * 100 : 0;
@@ -39,6 +39,15 @@
                 <span class="sr-only">Fatura atual:</span>{{ Money::brl($bill) }}
             </span>
         </div>
+
+        @if ($upcoming !== [])
+            <p class="text-[13px] text-muted">
+                Próximas faturas:
+                @foreach ($upcoming as $next)
+                    <span class="tabular-nums">{{ $next['due']->format('d/m') }} · {{ Money::brl($next['amount']) }}</span>{{ $loop->last ? '' : ' · ' }}
+                @endforeach
+            </p>
+        @endif
     </div>
 
     <div class="absolute top-3 right-3 flex">

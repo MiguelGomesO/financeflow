@@ -2,7 +2,7 @@
     Campos do formulário de transação (Livewire Form em "form").
     $prefix evita ids repetidos quando há mais de um formulário na página.
 --}}
-@props(['categories', 'accounts', 'cards', 'type', 'prefix'])
+@props(['categories', 'accounts', 'cards', 'type', 'prefix', 'installments' => false])
 
 <x-ui.segmented label="Tipo de transação" model="form.type" :options="['expense' => 'Despesa', 'income' => 'Receita']" live />
 
@@ -56,6 +56,24 @@
         </x-ui.select>
     </x-ui.field>
 </div>
+
+@if ($installments)
+    {{-- Só despesa no cartão parcela. $wire lê o valor já escolhido, sem esperar o servidor. --}}
+    <div x-data x-show="$wire.form.type === 'expense' && $wire.form.source.startsWith('card:')" x-cloak>
+        <x-ui.field label="Parcelas" for="{{ $prefix }}-installments" error="form.installments">
+            <x-ui.select id="{{ $prefix }}-installments" wire:model="form.installments" class="input px-2.5">
+                <option value="1">À vista</option>
+                @foreach (range(2, \App\Support\Installments::MAX) as $n)
+                    <option value="{{ $n }}">{{ $n }}x</option>
+                @endforeach
+            </x-ui.select>
+        </x-ui.field>
+
+        <p x-show="Number($wire.form.installments) > 1" x-cloak class="mt-2 text-[13px] text-muted">
+            O valor acima é o total da compra. Ele é dividido em partes iguais, uma em cada fatura, a partir da data escolhida.
+        </p>
+    </div>
+@endif
 
 <x-ui.field label="Data" for="{{ $prefix }}-date" error="form.date">
     <x-ui.date-picker id="{{ $prefix }}-date" wire:model="form.date" />

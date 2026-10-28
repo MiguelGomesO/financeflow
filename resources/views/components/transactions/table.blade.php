@@ -30,6 +30,9 @@
                             aria-label="Editar {{ $row->description }}"
                         >
                             {{ $row->description }}
+                            @if ($row->installment_label)
+                                <span class="ml-1 text-[13px] font-normal text-muted tabular-nums">{{ $row->installment_label }}</span>
+                            @endif
                         </button>
                     </td>
                     <td class="px-2 py-3">

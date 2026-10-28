@@ -181,6 +181,7 @@ class Accounts extends Component
         $cards = CreditCard::query()->orderBy('id')->get();
         $bills = $cards->mapWithKeys(fn (CreditCard $card) => [$card->id => $card->openBill()]);
         $used = $cards->mapWithKeys(fn (CreditCard $card) => [$card->id => $card->usedLimit()]);
+        $upcoming = $cards->mapWithKeys(fn (CreditCard $card) => [$card->id => $card->upcomingBills()]);
         $balance = round($accounts->sum('balance'), 2);
         $billsTotal = round($bills->sum(), 2);
 
@@ -188,7 +189,9 @@ class Accounts extends Component
             'accounts' => $accounts,
             'cards' => $cards,
             'bills' => $bills,
-            'used' => $used,            'transfers' => Transfer::query()
+            'used' => $used,
+            'upcoming' => $upcoming,
+            'transfers' => Transfer::query()
                 ->with(['fromAccount:id,name', 'toAccount:id,name'])
                 ->orderByDesc('date')->orderByDesc('id')
                 ->limit(5)
