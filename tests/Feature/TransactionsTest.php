@@ -196,6 +196,54 @@ class TransactionsTest extends TestCase
         $this->assertModelMissing($transaction);
     }
 
+    public function test_exports_filtered_transactions_as_csv(): void
+    {
+        $this->transaction('Supermercado', -300, '2026-10-18');
+        $this->transaction('=HYPERLINK("x")', -10, '2026-10-17');
+        $this->transaction('Salário', 5000, '2026-10-05', 'Renda');
+        $this->transaction('Aluguel de setembro', -1500, '2026-09-10', 'Moradia');
+
+        $component = Livewire::test(Transactions::class)
+            ->set('type', 'expense')
+            ->call('export', 'csv')
+            ->assertFileDownloaded('transacoes-2026-10.csv');
+
+        $csv = base64_decode($component->effects['download']['content']);
+
+        $this->assertStringContainsString('Supermercado', $csv);
+        $this->assertStringContainsString('-300,00', $csv);
+        $this->assertStringContainsString("'=HYPERLINK", $csv);
+        $this->assertStringNotContainsString('Salário', $csv);
+        $this->assertStringNotContainsString('Aluguel de setembro', $csv);
+    }
+
+    public function test_exports_transactions_as_xlsx(): void
+    {
+        $this->transaction('Supermercado', -300, '2026-10-18');
+
+        Livewire::test(Transactions::class)
+            ->call('export', 'xlsx')
+            ->assertFileDownloaded('transacoes-2026-10.xlsx');
+    }
+
+    public function test_exports_transactions_as_pdf(): void
+    {
+        $this->transaction('Supermercado', -300, '2026-10-18');
+
+        $component = Livewire::test(Transactions::class)
+            ->call('export', 'pdf')
+            ->assertFileDownloaded('transacoes-2026-10.pdf');
+
+        $this->assertStringStartsWith('%PDF', base64_decode($component->effects['download']['content']));
+    }
+
+    public function test_rejects_unknown_export_format(): void
+    {
+        Livewire::test(Transactions::class)
+            ->call('export', 'exe')
+            ->assertStatus(422);
+    }
+
     public function test_parses_brazilian_amounts(): void
     {
         $this->assertSame(1234.56, Money::parse('1.234,56'));

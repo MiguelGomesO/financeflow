@@ -17,6 +17,34 @@
 
             <livewire:import />
 
+            {{-- Exporta o mês com os filtros atuais. --}}
+            <div class="relative" x-data="{ open: false }" x-on:click.outside="open = false" x-on:keydown.escape="open = false">
+                <button
+                    type="button"
+                    x-on:click="open = !open"
+                    x-bind:aria-expanded="open"
+                    aria-haspopup="menu"
+                    class="inline-flex min-h-11 items-center gap-2 rounded-xl border border-line-strong bg-white px-[18px] font-semibold text-ink hover:bg-mist"
+                >
+                    <x-icon name="download" class="size-[18px] rotate-180" />
+                    Exportar
+                </button>
+
+                <div x-show="open" x-cloak role="menu" class="absolute right-0 z-20 mt-2 w-44 overflow-hidden rounded-xl border border-line-strong bg-white py-1 shadow-lg">
+                    @foreach (['csv' => 'CSV (.csv)', 'xlsx' => 'Excel (.xlsx)', 'pdf' => 'PDF (.pdf)'] as $format => $label)
+                        <button
+                            type="button"
+                            role="menuitem"
+                            wire:click="export('{{ $format }}')"
+                            x-on:click="open = false"
+                            class="block min-h-11 w-full px-4 text-left text-sm font-medium hover:bg-mist"
+                        >
+                            {{ $label }}
+                        </button>
+                    @endforeach
+                </div>
+            </div>
+
             <a
                 href="#nova-transacao"
                 x-on:click="$nextTick(() => document.getElementById('tx-description')?.focus())"

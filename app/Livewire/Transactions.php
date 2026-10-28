@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\Transaction;
 use App\Services\RecurringGenerator;
 use App\Support\Dates;
+use App\Support\TransactionExport;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 use Livewire\Attributes\On;
@@ -13,6 +14,7 @@ use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 #[Title('Transações · FinanceFlow')]
 class Transactions extends Component
@@ -58,6 +60,34 @@ class Transactions extends Component
     {
         $this->reset('search', 'type', 'category');
         $this->resetPage();
+    }
+
+    /** Baixa as transações do mês com os filtros atuais (todas, sem paginar). */
+    public function export(string $format): StreamedResponse
+    {
+        abort_unless(in_array($format, TransactionExport::FORMATS, true), 422);
+
+        return TransactionExport::download($this->filteredQuery(), $format, $this->month, $this->filterSummary());
+    }
+
+    /** Ex.: "Saídas · Mercado · busca "pão"". Vazio quando não há filtros. */
+    private function filterSummary(): string
+    {
+        $parts = [];
+
+        if ($this->type !== 'all') {
+            $parts[] = self::TYPES[$this->type];
+        }
+
+        if ($this->category !== '') {
+            $parts[] = Category::whereKey((int) $this->category)->value('name');
+        }
+
+        if (trim($this->search) !== '') {
+            $parts[] = 'busca "'.trim($this->search).'"';
+        }
+
+        return implode(' · ', $parts);
     }
 
     /** Recarrega a lista quando uma transação é criada, editada ou excluída. */
