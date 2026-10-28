@@ -1,7 +1,7 @@
 @use('App\Support\Money')
-@props(['rows', 'hasFilters' => false, 'selected' => []])
+@props(['rows', 'hasFilters' => false, 'selected' => [], 'sort' => 'date', 'direction' => 'desc'])
 
-<div class="-mx-2 overflow-x-auto" wire:loading.class="opacity-60" wire:target="month,search,type,category,tag,clearFilters,gotoPage,nextPage,previousPage">
+<div class="-mx-2 overflow-x-auto" wire:loading.class="opacity-60" wire:target="month,search,type,category,tag,sortBy,clearFilters,gotoPage,nextPage,previousPage">
     <table class="w-full min-w-[560px] border-collapse text-sm">
         <thead>
             <tr class="text-left text-[13px] text-muted">
@@ -21,11 +21,11 @@
                         "
                     >
                 </th>
-                <th scope="col" class="px-2 py-2.5 font-medium">Data</th>
-                <th scope="col" class="px-2 py-2.5 font-medium">Descrição</th>
-                <th scope="col" class="px-2 py-2.5 font-medium">Categoria</th>
+                <x-transactions.sort-header column="date" label="Data" :sort="$sort" :direction="$direction" />
+                <x-transactions.sort-header column="description" label="Descrição" :sort="$sort" :direction="$direction" />
+                <x-transactions.sort-header column="category" label="Categoria" :sort="$sort" :direction="$direction" />
                 <th scope="col" class="px-2 py-2.5 font-medium">Conta</th>
-                <th scope="col" class="px-2 py-2.5 text-right font-medium">Valor</th>
+                <x-transactions.sort-header column="amount" label="Valor" align="right" :sort="$sort" :direction="$direction" />
             </tr>
         </thead>
         <tbody>

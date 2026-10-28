@@ -46,6 +46,22 @@ class Transactions extends Component
     #[Url(except: '')]
     public string $tag = '';
 
+    /** Coluna da ordenação: uma chave de SORTS. */
+    #[Url(except: 'date')]
+    public string $sort = 'date';
+
+    /** "asc" ou "desc". */
+    #[Url(except: 'desc')]
+    public string $direction = 'desc';
+
+    /** Colunas que dá para ordenar e o sentido da primeira vez que se clica nelas. */
+    public const SORTS = [
+        'date' => 'desc',
+        'description' => 'asc',
+        'category' => 'asc',
+        'amount' => 'desc',
+    ];
+
     /** Quantas transações dá para marcar de uma vez. */
     public const MAX_SELECTION = 1000;
 
@@ -81,6 +97,24 @@ class Transactions extends Component
         $this->reset('search', 'type', 'category', 'tag');
         $this->resetPage();
         $this->clearSelection();
+    }
+
+    /** Clicar numa coluna ordena por ela; clicar de novo inverte o sentido. */
+    public function sortBy(string $column): void
+    {
+        if (! array_key_exists($column, self::SORTS)) {
+            return;
+        }
+
+        if ($this->sort === $column) {
+            $this->direction = $this->direction === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->sort = $column;
+            $this->direction = self::SORTS[$column];
+        }
+
+        $this->notice = null;
+        $this->resetPage();
     }
 
     public function clearSelection(): void
@@ -190,7 +224,7 @@ class Transactions extends Component
             'bulkCategories' => $bulkType ? Category::query()->ofType($bulkType)->orderBy('name')->get(['id', 'name']) : collect(),
             'rows' => (clone $filtered)
                 ->with(['category:id,name', 'account:id,name', 'creditCard:id,name', 'tags:id,name'])
-                ->latestFirst()
+                ->tap(fn (Builder $query) => $this->applySort($query))
                 ->paginate(20),
             'tags' => Tag::query()->has('transactions')->orderByRaw('lower(name)')->get(['id', 'name']),
             'months' => $this->monthOptions(),
@@ -240,6 +274,27 @@ class Transactions extends Component
         $this->dispatch('transactions-changed');
     }
 
+    /** Ordena pela coluna escolhida; empates saem do mais recente para o mais antigo. */
+    private function applySort(Builder $query): void
+    {
+        $direction = $this->direction === 'asc' ? 'asc' : 'desc';
+
+        match ($this->sort) {
+            'description' => $query->orderByRaw("lower(transactions.description) {$direction}"),
+            'category' => $query->orderBy(
+                Category::query()->selectRaw('lower(categories.name)')->whereColumn('categories.id', 'transactions.category_id'),
+                $direction,
+            ),
+            // Pelo tamanho do valor: as maiores saídas e entradas ficam juntas, sem depender do sinal.
+            'amount' => $query->orderByRaw("abs(transactions.amount) {$direction}"),
+            default => $query->orderBy('transactions.date', $direction)->orderBy('transactions.id', $direction),
+        };
+
+        if ($this->sort !== 'date') {
+            $query->latestFirst();
+        }
+    }
+
     private function filteredQuery(): Builder
     {
         $start = Carbon::createFromFormat('!Y-m', $this->month);
@@ -274,6 +329,14 @@ class Transactions extends Component
 
     private function normalizeFilters(): void
     {
+        if (! array_key_exists($this->sort, self::SORTS)) {
+            $this->sort = 'date';
+        }
+
+        if (! in_array($this->direction, ['asc', 'desc'], true)) {
+            $this->direction = self::SORTS[$this->sort];
+        }
+
         if (! preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $this->month)) {
             $this->month = now()->format('Y-m');
         }
