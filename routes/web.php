@@ -10,6 +10,8 @@ use App\Livewire\Profile;
 use App\Livewire\Recurring;
 use App\Livewire\Reports;
 use App\Livewire\Transactions;
+use App\Models\Transaction;
+use App\Support\Receipts;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -23,6 +25,14 @@ Route::middleware('auth')->group(function () {
     Route::livewire('/', Dashboard::class)->name('dashboard');
     Route::livewire('/transacoes', Transactions::class)->name('transactions');
     Route::livewire('/relatorios', Reports::class)->name('reports');
+
+    // Comprovantes ficam em disco privado; o binding já limita à transação do usuário logado.
+    Route::get('/comprovantes/{transaction}', function (Transaction $transaction) {
+        abort_unless($transaction->attachment_path && Receipts::disk()->exists($transaction->attachment_path), 404);
+
+        return Receipts::disk()->response($transaction->attachment_path, null, ['X-Content-Type-Options' => 'nosniff']);
+    })->name('receipts.show');
+
     Route::livewire('/recorrentes', Recurring::class)->name('recurring');
     Route::livewire('/orcamentos', Budgets::class)->name('budgets');
     Route::livewire('/metas', Goals::class)->name('goals');

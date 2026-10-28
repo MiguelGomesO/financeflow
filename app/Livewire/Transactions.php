@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Category;
+use App\Models\Tag;
 use App\Models\Transaction;
 use App\Services\RecurringGenerator;
 use App\Support\Dates;
@@ -41,6 +42,10 @@ class Transactions extends Component
     #[Url(except: '')]
     public string $category = '';
 
+    /** Id da etiqueta ('' = todas). */
+    #[Url(except: '')]
+    public string $tag = '';
+
     public function mount(RecurringGenerator $recurring): void
     {
         $recurring->run();
@@ -50,7 +55,7 @@ class Transactions extends Component
 
     public function updated(string $property): void
     {
-        if (in_array($property, ['month', 'search', 'type', 'category'], true)) {
+        if (in_array($property, ['month', 'search', 'type', 'category', 'tag'], true)) {
             $this->normalizeFilters();
             $this->resetPage();
         }
@@ -58,7 +63,7 @@ class Transactions extends Component
 
     public function clearFilters(): void
     {
-        $this->reset('search', 'type', 'category');
+        $this->reset('search', 'type', 'category', 'tag');
         $this->resetPage();
     }
 
@@ -83,6 +88,10 @@ class Transactions extends Component
             $parts[] = Category::whereKey((int) $this->category)->value('name');
         }
 
+        if ($this->tag !== '') {
+            $parts[] = '#'.Tag::whereKey((int) $this->tag)->value('name');
+        }
+
         if (trim($this->search) !== '') {
             $parts[] = 'busca "'.trim($this->search).'"';
         }
@@ -103,13 +112,14 @@ class Transactions extends Component
 
         return view('livewire.transactions', [
             'rows' => (clone $filtered)
-                ->with(['category:id,name', 'account:id,name', 'creditCard:id,name'])
+                ->with(['category:id,name', 'account:id,name', 'creditCard:id,name', 'tags:id,name'])
                 ->latestFirst()
                 ->paginate(20),
+            'tags' => Tag::query()->has('transactions')->orderByRaw('lower(name)')->get(['id', 'name']),
             'months' => $this->monthOptions(),
             'types' => self::TYPES,
             'categories' => Category::query()->orderBy('name')->get(['id', 'name']),
-            'hasFilters' => $this->search !== '' || $this->type !== 'all' || $this->category !== '',
+            'hasFilters' => $this->search !== '' || $this->type !== 'all' || $this->category !== '' || $this->tag !== '',
             'totals' => [
                 'income' => $income,
                 'expense' => $expense,
@@ -128,7 +138,8 @@ class Transactions extends Component
             ->when($search !== '', fn (Builder $q) => $q->where('description', 'like', '%'.addcslashes($search, '%_\\').'%'))
             ->when($this->type === 'income', fn (Builder $q) => $q->where('amount', '>', 0))
             ->when($this->type === 'expense', fn (Builder $q) => $q->where('amount', '<', 0))
-            ->when($this->category !== '', fn (Builder $q) => $q->where('category_id', (int) $this->category));
+            ->when($this->category !== '', fn (Builder $q) => $q->where('category_id', (int) $this->category))
+            ->when($this->tag !== '', fn (Builder $q) => $q->whereHas('tags', fn (Builder $t) => $t->whereKey((int) $this->tag)));
     }
 
     /** Do mês da transação mais antiga até o mês atual, mais recente primeiro. */
@@ -161,6 +172,10 @@ class Transactions extends Component
 
         if ($this->category !== '' && ! Category::whereKey((int) $this->category)->exists()) {
             $this->category = '';
+        }
+
+        if ($this->tag !== '' && ! Tag::whereKey((int) $this->tag)->exists()) {
+            $this->tag = '';
         }
     }
 }

@@ -3,12 +3,15 @@
 namespace App\Livewire;
 
 use App\Livewire\Forms\TransactionForm;
+use App\Models\Tag;
 use App\Models\Transaction;
 use App\Support\Installments;
+use App\Support\Receipts;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 
 /**
  * Formulário "Nova transação": em modal (padrão) ou embutido na página (inline).
@@ -17,6 +20,8 @@ use Livewire\Component;
  */
 class CreateTransaction extends Component
 {
+    use WithFileUploads;
+
     public TransactionForm $form;
 
     public bool $inline = false;
@@ -39,7 +44,15 @@ class CreateTransaction extends Component
         $attributes = $this->form->attributes();
         $count = $this->form->installmentCount();
 
-        $count > 1 ? $this->createInstallments($attributes, $count) : Transaction::create($attributes);
+        // O comprovante é guardado uma vez; as parcelas da mesma compra apontam para o mesmo arquivo.
+        $attributes['attachment_path'] = $this->form->attachment ? Receipts::store($this->form->attachment) : null;
+        $tags = Tag::idsFor($this->form->tagNames());
+
+        DB::transaction(function () use ($attributes, $count, $tags) {
+            $count > 1
+                ? $this->createInstallments($attributes, $count, $tags)
+                : Transaction::create($attributes)->tags()->sync($tags);
+        });
 
         $this->form->clearInputs();
         $this->dispatch('transactions-changed');
@@ -52,22 +65,20 @@ class CreateTransaction extends Component
     }
 
     /** O valor digitado é o total da compra: vira uma transação por parcela, uma por fatura. */
-    private function createInstallments(array $attributes, int $count): void
+    private function createInstallments(array $attributes, int $count, array $tags): void
     {
         $group = (string) Str::uuid();
 
-        DB::transaction(function () use ($attributes, $count, $group) {
-            foreach (Installments::schedule(-$attributes['amount'], $count, Carbon::parse($attributes['date'])) as $parcel) {
-                Transaction::create([
-                    ...$attributes,
-                    'amount' => -$parcel['amount'],
-                    'date' => $parcel['date'],
-                    'installment_group' => $group,
-                    'installment_number' => $parcel['number'],
-                    'installment_total' => $count,
-                ]);
-            }
-        });
+        foreach (Installments::schedule(-$attributes['amount'], $count, Carbon::parse($attributes['date'])) as $parcel) {
+            Transaction::create([
+                ...$attributes,
+                'amount' => -$parcel['amount'],
+                'date' => $parcel['date'],
+                'installment_group' => $group,
+                'installment_number' => $parcel['number'],
+                'installment_total' => $count,
+            ])->tags()->sync($tags);
+        }
     }
 
     public function render()

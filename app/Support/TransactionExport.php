@@ -16,13 +16,13 @@ class TransactionExport
 {
     public const FORMATS = ['csv', 'xlsx', 'pdf'];
 
-    private const HEADERS = ['Data', 'Descrição', 'Categoria', 'Conta/Cartão', 'Valor'];
+    private const HEADERS = ['Data', 'Descrição', 'Categoria', 'Conta/Cartão', 'Etiquetas', 'Valor'];
 
     /** @param  string  $filters  Resumo dos filtros aplicados, impresso no cabeçalho do PDF. */
     public static function download(Builder $query, string $format, string $month, string $filters = ''): StreamedResponse
     {
         $transactions = $query
-            ->with(['category:id,name', 'account:id,name', 'creditCard:id,name'])
+            ->with(['category:id,name', 'account:id,name', 'creditCard:id,name', 'tags:id,name'])
             ->latestFirst()
             ->get();
 
@@ -60,18 +60,20 @@ class TransactionExport
             $worksheet->setCellValueExplicit([3, $row], self::text($transaction->category->name, $csv), DataType::TYPE_STRING);
             $worksheet->setCellValueExplicit([4, $row], self::text($transaction->source_name ?? '', $csv), DataType::TYPE_STRING);
 
+            $worksheet->setCellValueExplicit([5, $row], self::text($transaction->tags->pluck('name')->implode(', '), $csv), DataType::TYPE_STRING);
+
             // No CSV o valor vai como texto com vírgula, para o Excel em pt-BR reconhecer como número.
             $csv
-                ? $worksheet->setCellValueExplicit([5, $row], number_format($transaction->amount, 2, ',', ''), DataType::TYPE_STRING)
-                : $worksheet->setCellValueExplicit([5, $row], $transaction->amount, DataType::TYPE_NUMERIC);
+                ? $worksheet->setCellValueExplicit([6, $row], number_format($transaction->amount, 2, ',', ''), DataType::TYPE_STRING)
+                : $worksheet->setCellValueExplicit([6, $row], $transaction->amount, DataType::TYPE_NUMERIC);
         }
 
         if (! $csv) {
-            $worksheet->getStyle('E2:E'.$worksheet->getHighestRow())
+            $worksheet->getStyle('F2:F'.$worksheet->getHighestRow())
                 ->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
-            $worksheet->getStyle('A1:E1')->getFont()->setBold(true);
+            $worksheet->getStyle('A1:F1')->getFont()->setBold(true);
 
-            foreach (range('A', 'E') as $column) {
+            foreach (range('A', 'F') as $column) {
                 $worksheet->getColumnDimension($column)->setAutoSize(true);
             }
         }

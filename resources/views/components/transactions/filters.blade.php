@@ -1,4 +1,4 @@
-@props(['types', 'categories', 'hasFilters' => false])
+@props(['types', 'categories', 'tags' => [], 'hasFilters' => false])
 
 <div class="flex flex-wrap items-center gap-3">
     <label for="search" class="sr-only">Buscar transação</label>
@@ -22,6 +22,16 @@
             <option value="{{ $category->id }}">{{ $category->name }}</option>
         @endforeach
     </x-ui.select>
+
+    @if (count($tags) > 0)
+        <label for="tag" class="sr-only">Etiqueta</label>
+        <x-ui.select id="tag" wire:model.live="tag" class="input w-auto">
+            <option value="">Todas as etiquetas</option>
+            @foreach ($tags as $tag)
+                <option value="{{ $tag->id }}">#{{ $tag->name }}</option>
+            @endforeach
+        </x-ui.select>
+    @endif
 
     @if ($hasFilters)
         <button type="button" wire:click="clearFilters" class="min-h-11 rounded-xl px-3 text-sm font-semibold text-brand hover:bg-brand-light">

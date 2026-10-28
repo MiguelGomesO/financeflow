@@ -34,6 +34,26 @@
                                 <span class="ml-1 text-[13px] font-normal text-muted tabular-nums">{{ $row->installment_label }}</span>
                             @endif
                         </button>
+                        @if ($row->attachment_path)
+                            <a
+                                href="{{ route('receipts.show', $row) }}"
+                                target="_blank"
+                                rel="noopener"
+                                x-on:click.stop
+                                title="Ver comprovante"
+                                aria-label="Ver comprovante de {{ $row->description }}"
+                                class="ml-1 inline-flex align-middle text-muted hover:text-brand"
+                            >
+                                <x-icon name="paperclip" class="size-4" />
+                            </a>
+                        @endif
+                        @if ($row->tags->isNotEmpty())
+                            <div class="flex flex-wrap gap-1 pt-0.5">
+                                @foreach ($row->tags as $tag)
+                                    <span class="rounded-full bg-brand-light px-2 py-0.5 text-xs text-brand-dark">#{{ $tag->name }}</span>
+                                @endforeach
+                            </div>
+                        @endif
                     </td>
                     <td class="px-2 py-3">
                         <span class="rounded-full bg-mist px-2.5 py-0.5 text-[13px] text-soft">{{ $row->category->name }}</span>

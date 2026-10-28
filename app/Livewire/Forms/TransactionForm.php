@@ -5,9 +5,11 @@ namespace App\Livewire\Forms;
 use App\Models\Account;
 use App\Models\Category;
 use App\Models\CreditCard;
+use App\Models\Tag;
 use App\Models\Transaction;
 use App\Support\Installments;
 use App\Support\Money;
+use App\Support\Receipts;
 use Closure;
 use Illuminate\Validation\Rule;
 use Livewire\Form;
@@ -28,6 +30,12 @@ class TransactionForm extends Form
     public string $source = '';
 
     public string $date = '';
+
+    /** Etiquetas separadas por vírgula, ex.: "viagem, trabalho". */
+    public string $tags = '';
+
+    /** Comprovante recém-escolhido (envio temporário do Livewire). */
+    public $attachment = null;
 
     /** Número de parcelas (só no cartão e só ao criar); "1" = à vista. */
     public string $installments = '1';
@@ -51,6 +59,8 @@ class TransactionForm extends Form
             ? "account:{$transaction->account_id}"
             : "card:{$transaction->credit_card_id}";
         $this->date = $transaction->date->toDateString();
+        $this->tags = $transaction->tags->pluck('name')->implode(', ');
+        $this->attachment = null;
         $this->resetErrorBag();
     }
 
@@ -67,6 +77,21 @@ class TransactionForm extends Form
         if ($this->type === 'income' && str_starts_with($this->source, 'card:')) {
             $this->source = $this->firstAccountSource();
         }
+    }
+
+    /**
+     * Etiquetas digitadas, sem espaços sobrando nem repetidas ("Viagem" = "viagem").
+     *
+     * @return list<string>
+     */
+    public function tagNames(): array
+    {
+        return collect(preg_split('/[,;]+/', $this->tags))
+            ->map(fn (string $tag) => trim(preg_replace('/\s+/u', ' ', $tag)))
+            ->filter()
+            ->unique(fn (string $tag) => mb_strtolower($tag))
+            ->values()
+            ->all();
     }
 
     /** Parcelas efetivas: só despesa no cartão parcela; nos demais casos vale 1. */
@@ -101,6 +126,8 @@ class TransactionForm extends Form
         return [
             'categories' => Category::query()->ofType($this->type)->orderBy('name')->get(['id', 'name']),
             'accounts' => Account::query()->orderBy('name')->get(['id', 'name']),
+            'tagSuggestions' => Tag::query()->has('transactions')->withCount('transactions')
+                ->orderByDesc('transactions_count')->orderByRaw('lower(name)')->limit(8)->pluck('name')->all(),
             'cards' => $this->type === 'expense'
                 ? CreditCard::query()->orderBy('name')->get(['id', 'name'])
                 : collect(),
@@ -109,7 +136,7 @@ class TransactionForm extends Form
 
     public function clearInputs(): void
     {
-        $this->reset('description', 'amount', 'installments');
+        $this->reset('description', 'amount', 'installments', 'tags', 'attachment');
         $this->resetErrorBag();
     }
 
@@ -141,6 +168,16 @@ class TransactionForm extends Form
             }],
             'date' => ['required', 'date_format:Y-m-d'],
             'installments' => ['required', 'integer', 'between:1,'.Installments::MAX],
+            'tags' => ['nullable', 'string', 'max:400', function (string $attribute, mixed $value, Closure $fail) {
+                $names = $this->tagNames();
+
+                if (count($names) > Tag::MAX_PER_TRANSACTION) {
+                    $fail('Use no máximo '.Tag::MAX_PER_TRANSACTION.' etiquetas.');
+                } elseif (collect($names)->contains(fn (string $name) => mb_strlen($name) > Tag::MAX_LENGTH)) {
+                    $fail('Cada etiqueta pode ter no máximo '.Tag::MAX_LENGTH.' caracteres.');
+                }
+            }],
+            'attachment' => ['nullable', 'file', 'mimes:'.Receipts::MIMES, 'max:'.Receipts::MAX_KB],
         ];
     }
 
@@ -155,6 +192,10 @@ class TransactionForm extends Form
             'source.required' => 'Escolha uma conta ou cartão.',
             'date.required' => 'Informe a data.',
             'date.date_format' => 'Data inválida.',
+            'attachment.mimes' => 'Envie JPG, PNG, WebP ou PDF.',
+            'attachment.max' => 'O comprovante pode ter no máximo 5 MB.',
+            'attachment.uploaded' => 'Não foi possível enviar o comprovante (máximo de 5 MB).',
+            'attachment.*' => 'Comprovante inválido.',
             'installments.*' => 'Escolha de 1 a '.Installments::MAX.' parcelas.',
         ];
     }

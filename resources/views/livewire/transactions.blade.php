@@ -64,7 +64,7 @@
 
     <div class="grid grid-cols-1 items-start gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
         <x-ui.card class="min-w-0">
-            <x-transactions.filters :types="$types" :categories="$categories" :has-filters="$hasFilters" />
+            <x-transactions.filters :types="$types" :categories="$categories" :tags="$tags" :has-filters="$hasFilters" />
             <x-transactions.table :rows="$rows" :has-filters="$hasFilters" />
         </x-ui.card>
 

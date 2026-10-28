@@ -43,6 +43,7 @@
                 <th>Descrição</th>
                 <th>Categoria</th>
                 <th>Conta/Cartão</th>
+                <th>Etiquetas</th>
                 <th class="right">Valor</th>
             </tr>
         </thead>
@@ -53,10 +54,11 @@
                     <td>{{ $transaction->description }}</td>
                     <td>{{ $transaction->category->name }}</td>
                     <td>{{ $transaction->source_name }}</td>
+                    <td>{{ $transaction->tags->pluck('name')->implode(', ') }}</td>
                     <td class="right {{ $transaction->amount > 0 ? 'income' : '' }}">{{ Money::brl($transaction->amount, signed: true) }}</td>
                 </tr>
             @empty
-                <tr><td colspan="5" class="empty">Nenhuma transação encontrada.</td></tr>
+                <tr><td colspan="6" class="empty">Nenhuma transação encontrada.</td></tr>
             @endforelse
         </tbody>
     </table>

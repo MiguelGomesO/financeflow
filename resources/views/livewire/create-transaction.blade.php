@@ -12,7 +12,7 @@
                     x-data="{ saved: false }"
                     x-on:transaction-saved.window="saved = true; setTimeout(() => saved = false, 2500); document.getElementById('tx-description')?.focus()"
                 >
-                    <x-transactions.form-fields installments prefix="tx" :type="$form->type" :categories="$categories" :accounts="$accounts" :cards="$cards" />
+                    <x-transactions.form-fields installments prefix="tx" :type="$form->type" :categories="$categories" :accounts="$accounts" :cards="$cards" :tag-suggestions="$tagSuggestions" />
 
                     <button
                         type="submit"
@@ -36,7 +36,7 @@
                 <p class="text-body">Cadastre uma conta antes de lançar transações.</p>
             @else
                 <form wire:submit="save" class="flex flex-col gap-4">
-                    <x-transactions.form-fields installments prefix="new-tx" :type="$form->type" :categories="$categories" :accounts="$accounts" :cards="$cards" />
+                    <x-transactions.form-fields installments prefix="new-tx" :type="$form->type" :categories="$categories" :accounts="$accounts" :cards="$cards" :tag-suggestions="$tagSuggestions" />
 
                     <button
                         type="submit"

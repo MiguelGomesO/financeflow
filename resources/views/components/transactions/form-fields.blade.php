@@ -2,7 +2,7 @@
     Campos do formulário de transação (Livewire Form em "form").
     $prefix evita ids repetidos quando há mais de um formulário na página.
 --}}
-@props(['categories', 'accounts', 'cards', 'type', 'prefix', 'installments' => false])
+@props(['categories', 'accounts', 'cards', 'type', 'prefix', 'installments' => false, 'tagSuggestions' => []])
 
 <x-ui.segmented label="Tipo de transação" model="form.type" :options="['expense' => 'Despesa', 'income' => 'Receita']" live />
 
@@ -77,4 +77,54 @@
 
 <x-ui.field label="Data" for="{{ $prefix }}-date" error="form.date">
     <x-ui.date-picker id="{{ $prefix }}-date" wire:model="form.date" />
+</x-ui.field>
+
+<x-ui.field label="Etiquetas (opcional)" for="{{ $prefix }}-tags" error="form.tags">
+    <input
+        id="{{ $prefix }}-tags"
+        type="text"
+        wire:model="form.tags"
+        placeholder="Ex.: viagem, trabalho"
+        maxlength="400"
+        autocomplete="off"
+        class="input"
+        @error('form.tags') aria-invalid="true" aria-describedby="{{ $prefix }}-tags-error" @enderror
+    >
+    @if ($tagSuggestions !== [])
+        <div
+            class="flex flex-wrap gap-1.5 pt-0.5"
+            x-data="{
+                add(name) {
+                    const list = ($wire.form.tags || '').split(/[,;]+/).map((t) => t.trim()).filter(Boolean);
+                    if (! list.some((t) => t.toLowerCase() === name.toLowerCase())) {
+                        list.push(name);
+                        $wire.form.tags = list.join(', ');
+                    }
+                },
+            }"
+        >
+            @foreach ($tagSuggestions as $suggestion)
+                <button
+                    type="button"
+                    x-on:click="add(@js($suggestion))"
+                    class="rounded-full bg-mist px-2.5 py-1 text-[13px] text-soft hover:bg-line"
+                >
+                    + {{ $suggestion }}
+                </button>
+            @endforeach
+        </div>
+    @endif
+</x-ui.field>
+
+<x-ui.field label="Comprovante (opcional)" for="{{ $prefix }}-attachment" error="form.attachment">
+    <input
+        id="{{ $prefix }}-attachment"
+        type="file"
+        wire:model="form.attachment"
+        accept="image/jpeg,image/png,image/webp,application/pdf"
+        class="input text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-mist file:px-3 file:py-1.5 file:text-sm file:font-semibold"
+        @error('form.attachment') aria-invalid="true" aria-describedby="{{ $prefix }}-attachment-error" @enderror
+    >
+    <span wire:loading wire:target="form.attachment" class="text-[13px] text-muted">Enviando…</span>
+    <span class="text-[13px] text-muted">Foto ou PDF, até 5 MB.</span>
 </x-ui.field>

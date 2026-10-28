@@ -8,7 +8,18 @@
                 </p>
             @endif
 
-            <x-transactions.form-fields prefix="edit-tx" :type="$form->type" :categories="$categories" :accounts="$accounts" :cards="$cards" />
+            <x-transactions.form-fields prefix="edit-tx" :type="$form->type" :categories="$categories" :accounts="$accounts" :cards="$cards" :tag-suggestions="$tagSuggestions" />
+
+            @if ($hasAttachment && ! $removeAttachment)
+                <div class="-mt-2 flex flex-wrap items-center justify-between gap-2 rounded-xl bg-mist px-4 py-2.5 text-sm">
+                    <a href="{{ route('receipts.show', $transactionId) }}" target="_blank" rel="noopener" class="font-semibold text-brand hover:text-brand-dark">
+                        Ver comprovante atual
+                    </a>
+                    <button type="button" wire:click="removeReceipt" class="font-semibold text-expense-dark hover:underline">Remover</button>
+                </div>
+            @elseif ($hasAttachment)
+                <p class="-mt-2 text-[13px] text-muted">O comprovante atual será removido ao salvar.</p>
+            @endif
 
             <button
                 type="submit"

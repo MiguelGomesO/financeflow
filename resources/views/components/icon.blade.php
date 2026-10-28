@@ -77,6 +77,9 @@
         @case('chevron-right')
             <path d="m9 18 6-6-6-6" />
             @break
+        @case('paperclip')
+            <path d="M21 11.5l-8.6 8.6a5 5 0 0 1-7-7l8.6-8.6a3.4 3.4 0 0 1 4.8 4.8l-8.6 8.6a1.7 1.7 0 0 1-2.4-2.4l8-8" />
+            @break
         @case('download')
             <path d="M12 3v12M7 10l5 5 5-5" /><path d="M4 21h16" />
             @break
