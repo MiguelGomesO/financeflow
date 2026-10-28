@@ -24,7 +24,7 @@
     </div>
 
     @if ($rules->isEmpty())
-        <div class="flex flex-col items-center gap-3 rounded-[20px] border border-dashed border-line-strong bg-white px-6 py-12 text-center">
+        <div class="flex flex-col items-center gap-3 rounded-[20px] border border-dashed border-line-strong bg-surface px-6 py-12 text-center">
             <p class="text-muted">Você ainda não tem lançamentos recorrentes.</p>
             <button type="button" wire:click="create" class="min-h-11 rounded-xl border border-line-strong px-4 text-sm font-semibold hover:bg-mist">
                 Criar o primeiro
@@ -37,7 +37,7 @@
                 <article
                     wire:key="rule-{{ $rule->id }}"
                     @class([
-                        'flex h-full flex-col gap-4 rounded-[20px] border border-line bg-white p-6',
+                        'flex h-full flex-col gap-4 rounded-[20px] border border-line bg-surface p-6',
                         'opacity-70' => ! $rule->active,
                     ])
                 >
@@ -48,7 +48,7 @@
                         </div>
                         <span @class([
                             'shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold whitespace-nowrap',
-                            'bg-brand-light text-brand-dark' => $rule->active,
+                            'bg-brand-light text-brand-dark-fg' => $rule->active,
                             'bg-mist text-soft' => ! $rule->active,
                         ])>{{ $rule->active ? 'Ativa' : 'Pausada' }}</span>
                     </div>
@@ -56,8 +56,8 @@
                     <div class="flex flex-col gap-1">
                         <span @class([
                             'font-display text-2xl font-semibold tabular-nums',
-                            'text-brand' => $rule->amount > 0,
-                            'text-expense' => $rule->amount < 0,
+                            'text-brand-fg' => $rule->amount > 0,
+                            'text-expense-fg' => $rule->amount < 0,
                         ])>{{ Money::brl($rule->amount, signed: true) }}</span>
                         <span class="text-sm text-muted">Todo dia {{ $rule->day_of_month }}</span>
                         <span class="text-[13px] text-soft">
@@ -78,14 +78,14 @@
                         <button
                             type="button"
                             wire:click="toggle({{ $rule->id }})"
-                            class="min-h-11 flex-1 rounded-xl bg-brand-light text-sm font-semibold text-brand-dark hover:bg-brand hover:text-white"
+                            class="min-h-11 flex-1 rounded-xl bg-brand-light text-sm font-semibold text-brand-dark-fg hover:bg-brand hover:text-white"
                         >
                             {{ $rule->active ? 'Pausar' : 'Retomar' }}
                         </button>
                         <button
                             type="button"
                             wire:click="edit({{ $rule->id }})"
-                            class="min-h-11 flex-1 rounded-xl border border-line-strong bg-white text-sm font-semibold text-ink hover:bg-mist"
+                            class="min-h-11 flex-1 rounded-xl border border-line-strong bg-surface text-sm font-semibold text-strong hover:bg-mist"
                             aria-label="Editar {{ $rule->description }}"
                         >
                             Editar

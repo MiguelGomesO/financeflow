@@ -23,7 +23,7 @@
                             <td class="px-2 py-3 text-muted tabular-nums">{{ Carbon::parse($deposit['date'])->format('d/m') }}</td>
                             <td class="px-2 py-3 font-medium">{{ $deposit['goal'] }}</td>
                             <td class="px-2 py-3 text-muted">{{ $deposit['account'] ?? '—' }}</td>
-                            <td class="px-2 py-3 text-right font-semibold whitespace-nowrap text-brand tabular-nums">
+                            <td class="px-2 py-3 text-right font-semibold whitespace-nowrap text-brand-fg tabular-nums">
                                 {{ Money::brl($deposit['amount'], signed: true) }}
                             </td>
                             <td class="px-2 py-1 text-right">
@@ -31,7 +31,7 @@
                                     type="button"
                                     wire:click="deleteDeposit({{ $deposit['id'] }})"
                                     wire:confirm="Desfazer este depósito?"
-                                    class="min-h-11 rounded-xl px-3 text-sm font-semibold text-expense-dark hover:bg-expense-light"
+                                    class="min-h-11 rounded-xl px-3 text-sm font-semibold text-expense-dark-fg hover:bg-expense-light"
                                 >
                                     Desfazer
                                 </button>

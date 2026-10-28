@@ -11,8 +11,8 @@
         type="button"
         wire:click="sortBy('{{ $column }}')"
         @class([
-            '-mx-1.5 inline-flex min-h-9 items-center gap-1 rounded-lg px-1.5 hover:bg-mist hover:text-ink',
-            'font-semibold text-ink' => $active,
+            '-mx-1.5 inline-flex min-h-9 items-center gap-1 rounded-lg px-1.5 hover:bg-mist hover:text-strong',
+            'font-semibold text-strong' => $active,
         ])
     >
         {{ $label }}

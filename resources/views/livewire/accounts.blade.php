@@ -13,7 +13,7 @@
                 wire:click="openTransfer"
                 @disabled($accounts->count() < 2)
                 @if ($accounts->count() < 2) title="Cadastre ao menos duas contas" @endif
-                class="inline-flex min-h-11 items-center gap-2 rounded-xl border border-line-strong bg-white px-[18px] font-semibold text-ink hover:bg-mist disabled:cursor-not-allowed disabled:opacity-50"
+                class="inline-flex min-h-11 items-center gap-2 rounded-xl border border-line-strong bg-surface px-[18px] font-semibold text-strong hover:bg-mist disabled:cursor-not-allowed disabled:opacity-50"
             >
                 <x-icon name="transactions" class="size-[18px]" />
                 Transferir
@@ -38,7 +38,7 @@
     <section class="flex flex-col gap-3.5" aria-labelledby="accounts-title">
         <h2 id="accounts-title" class="font-display text-xl font-semibold">Contas</h2>
         @if ($accounts->isEmpty())
-            <div class="flex flex-col items-center gap-3 rounded-[20px] border border-dashed border-line-strong bg-white px-6 py-10 text-center">
+            <div class="flex flex-col items-center gap-3 rounded-[20px] border border-dashed border-line-strong bg-surface px-6 py-10 text-center">
                 <p class="text-muted">Nenhuma conta cadastrada. Comece pela sua conta principal.</p>
                 <button type="button" wire:click="openCreate" class="min-h-11 rounded-xl border border-line-strong px-4 text-sm font-semibold hover:bg-mist">
                     Adicionar conta
@@ -56,7 +56,7 @@
     <section class="flex flex-col gap-3.5" aria-labelledby="cards-title">
         <h2 id="cards-title" class="font-display text-xl font-semibold">Cartões de crédito</h2>
         @if ($cards->isEmpty())
-            <p class="rounded-[20px] border border-dashed border-line-strong bg-white px-6 py-8 text-center text-muted">
+            <p class="rounded-[20px] border border-dashed border-line-strong bg-surface px-6 py-8 text-center text-muted">
                 Nenhum cartão cadastrado.
             </p>
         @else

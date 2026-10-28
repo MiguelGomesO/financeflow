@@ -1,10 +1,10 @@
 @use('App\Support\Money')
 @props(['account'])
 
-<article {{ $attributes->class(['flex flex-col gap-3.5 rounded-[20px] border border-line bg-white p-[22px]']) }}>
+<article {{ $attributes->class(['flex flex-col gap-3.5 rounded-[20px] border border-line bg-surface p-[22px]']) }}>
     <div class="flex items-center gap-3">
         <x-bank-logo :name="$account->institution" :fallback="$account->name" class="size-11 rounded-xl text-[13px]">
-            <span class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-brand-light font-bold text-brand-dark" aria-hidden="true">
+            <span class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-brand-light font-bold text-brand-dark-fg" aria-hidden="true">
                 {{ mb_substr($account->name, 0, 1) }}
             </span>
         </x-bank-logo>
@@ -17,7 +17,7 @@
 
     <span @class([
         'font-display text-[26px] font-semibold tabular-nums',
-        'text-expense' => $account->balance < 0,
+        'text-expense-fg' => $account->balance < 0,
     ])>{{ Money::brl($account->balance) }}</span>
 
     @if ($account->note)

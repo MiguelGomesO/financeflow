@@ -36,8 +36,8 @@
 
         <x-dashboard.cash-flow-chart :months="$months" title="Evolução mensal" />
 
-        <details class="-mt-3 rounded-2xl border border-line bg-white px-5 py-3 text-sm">
-            <summary class="cursor-pointer font-semibold text-brand hover:text-brand-dark">Ver evolução em tabela</summary>
+        <details class="-mt-3 rounded-2xl border border-line bg-surface px-5 py-3 text-sm">
+            <summary class="cursor-pointer font-semibold text-brand-fg hover:text-brand-dark-fg">Ver evolução em tabela</summary>
             <div class="-mx-2 mt-3 overflow-x-auto">
                 <table class="w-full min-w-[420px] border-collapse">
                     <thead>

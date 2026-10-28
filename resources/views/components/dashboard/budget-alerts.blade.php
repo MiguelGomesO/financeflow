@@ -11,8 +11,8 @@
                 role="status"
                 @class([
                     'flex flex-wrap items-center justify-between gap-x-4 gap-y-1 rounded-2xl px-5 py-3.5 text-sm',
-                    'bg-expense-light text-expense-dark' => $over,
-                    'bg-expense-faint text-expense-dark' => ! $over,
+                    'bg-expense-light text-expense-dark-fg' => $over,
+                    'bg-expense-faint text-expense-dark-fg' => ! $over,
                 ])
             >
                 <span class="font-semibold">

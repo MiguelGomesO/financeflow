@@ -41,7 +41,7 @@
                         <td class="px-2 py-3 text-muted tabular-nums">{{ Carbon::parse($transaction['date'])->format('d/m') }}</td>
                         <td @class([
                             'px-2 py-3 text-right font-semibold tabular-nums',
-                            'text-brand' => $transaction['amount'] > 0,
+                            'text-brand-fg' => $transaction['amount'] > 0,
                         ])>
                             {{ Money::brl($transaction['amount'], signed: true) }}
                         </td>

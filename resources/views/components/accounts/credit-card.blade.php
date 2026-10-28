@@ -4,11 +4,11 @@
 @php
     $usedPercent = $card->limit > 0 ? max(0, $used) / $card->limit * 100 : 0;
     // Alterna as cores dos cartões para diferenciá-los.
-    $colors = ['bg-ink', 'bg-brand', 'bg-ink-600', 'bg-brand-dark'];
+    $colors = ['bg-ink dark:bg-ink-700', 'bg-brand', 'bg-ink-600', 'bg-brand-dark'];
     $color = $colors[($card->id - 1) % count($colors)];
 @endphp
 
-<article {{ $attributes->class(['relative flex flex-wrap gap-[22px] rounded-[20px] border border-line bg-white p-[22px]']) }}>
+<article {{ $attributes->class(['relative flex flex-wrap gap-[22px] rounded-[20px] border border-line bg-surface p-[22px]']) }}>
     <div class="flex h-28 w-full max-w-[180px] flex-[0_0_180px] flex-col justify-between rounded-[14px] px-4 py-3.5 text-white {{ $color }}">
         <div class="flex items-center gap-2">
             <x-bank-logo :name="$card->name" class="size-7 rounded-lg text-[11px]" />
@@ -34,7 +34,7 @@
 
         <div class="flex flex-wrap items-center gap-2 text-[13px]">
             <span class="rounded-full bg-mist px-2.5 py-1 text-soft">Fecha dia {{ $card->close_day }}</span>
-            <span class="rounded-full bg-expense-light px-2.5 py-1 font-semibold text-expense-dark">Vence dia {{ $card->due_day }}</span>
+            <span class="rounded-full bg-expense-light px-2.5 py-1 font-semibold text-expense-dark-fg">Vence dia {{ $card->due_day }}</span>
             <span class="ml-auto font-display text-[22px] font-semibold tabular-nums">
                 <span class="sr-only">Fatura atual:</span>{{ Money::brl($bill) }}
             </span>

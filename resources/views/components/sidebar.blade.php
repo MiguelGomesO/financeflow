@@ -52,8 +52,23 @@
         <x-sidebar.link :href="route('accounts')" icon="card" :active="request()->routeIs('accounts')">Contas e cartões</x-sidebar.link>
     </nav>
 
+    {{-- Alterna claro/escuro (a escolha "automático" fica no Perfil). --}}
+    <button
+        type="button"
+        x-data="themeSwitcher"
+        x-on:click="toggle()"
+        class="mt-auto flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm font-medium text-on-ink transition-colors hover:bg-ink-800"
+        x-bind:class="{ 'lg:justify-center lg:px-0': sidebarCollapsed }"
+        x-bind:aria-label="dark ? 'Mudar para o modo claro' : 'Mudar para o modo escuro'"
+        x-bind:title="sidebarCollapsed ? (dark ? 'Modo claro' : 'Modo escuro') : null"
+    >
+        <x-icon name="moon" x-show="!dark" />
+        <x-icon name="sun" x-show="dark" x-cloak />
+        <span x-bind:class="{ 'lg:hidden': sidebarCollapsed }" x-text="dark ? 'Modo claro' : 'Modo escuro'">Modo escuro</span>
+    </button>
+
     {{-- Menu aberto: foto e nome. Recolhido: só a foto. Ao clicar abre o menu do perfil (renderizado fora do menu lateral, que corta o que passa da borda). --}}
-    <div class="mt-auto flex" x-bind:class="{ 'lg:justify-center': sidebarCollapsed }">
+    <div class="flex" x-bind:class="{ 'lg:justify-center': sidebarCollapsed }">
         <button
             type="button"
             data-profile
@@ -90,7 +105,7 @@
     data-profile
     role="menu"
     aria-label="Perfil"
-    class="fixed z-50 flex w-60 flex-col gap-1 rounded-2xl border border-line bg-white p-2 text-ink shadow-xl"
+    class="fixed z-50 flex w-60 flex-col gap-1 rounded-2xl border border-line bg-surface p-2 text-strong shadow-xl"
 >
     <div class="flex items-center gap-3 px-2 py-2">
         <x-avatar :user="auth()->user()" class="size-10 text-sm" />
@@ -118,7 +133,7 @@
         <button
             type="submit"
             role="menuitem"
-            class="flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-left text-sm font-medium text-expense-dark hover:bg-expense-light"
+            class="flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-left text-sm font-medium text-expense-dark-fg hover:bg-expense-light"
         >
             <x-icon name="logout" class="size-[18px]" />
             Sair

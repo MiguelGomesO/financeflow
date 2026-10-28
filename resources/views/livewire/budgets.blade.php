@@ -28,7 +28,7 @@
         <x-budgets.summary :totals="$totals" :pace="$pace" />
 
         @if ($items->isEmpty())
-            <div class="flex flex-col items-center gap-3 rounded-[20px] border border-dashed border-line-strong bg-white px-6 py-12 text-center">
+            <div class="flex flex-col items-center gap-3 rounded-[20px] border border-dashed border-line-strong bg-surface px-6 py-12 text-center">
                 <p class="text-muted">Nenhum orçamento definido para este mês.</p>
                 <div class="flex flex-wrap justify-center gap-2.5">
                     @if ($canCopyPrevious)

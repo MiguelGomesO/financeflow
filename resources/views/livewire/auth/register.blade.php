@@ -68,6 +68,6 @@
 
     <p class="text-center text-sm text-muted">
         Já tem conta?
-        <a href="{{ route('login') }}" wire:navigate class="font-semibold text-brand hover:text-brand-dark">Entrar</a>
+        <a href="{{ route('login') }}" wire:navigate class="font-semibold text-brand-fg hover:text-brand-dark-fg">Entrar</a>
     </p>
 </div>

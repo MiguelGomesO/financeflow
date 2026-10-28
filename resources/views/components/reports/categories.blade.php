@@ -3,7 +3,7 @@
 
 <x-ui.card title="Gastos por categoria">
     <x-slot:header>
-        <span class="text-[13px] text-muted">Total: <span class="font-semibold tabular-nums text-ink">{{ Money::brl($expense) }}</span></span>
+        <span class="text-[13px] text-muted">Total: <span class="font-semibold tabular-nums text-strong">{{ Money::brl($expense) }}</span></span>
     </x-slot:header>
 
     @if ($categories === [])
@@ -26,8 +26,8 @@
                             @else
                                 <span @class([
                                     'text-[13px]',
-                                    'text-expense-dark' => $category['delta'] > 0,
-                                    'text-brand-dark' => $category['delta'] < 0,
+                                    'text-expense-dark-fg' => $category['delta'] > 0,
+                                    'text-brand-dark-fg' => $category['delta'] < 0,
                                 ])>
                                     {{ $category['delta'] > 0 ? '▲' : '▼' }} {{ round(abs($category['delta'])) }}%
                                     <span class="sr-only">{{ $category['delta'] > 0 ? 'a mais' : 'a menos' }} que no período anterior</span>

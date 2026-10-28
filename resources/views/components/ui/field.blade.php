@@ -5,7 +5,7 @@
     {{ $slot }}
     @if ($error)
         @error($error)
-            <p id="{{ $for }}-error" class="text-[13px] font-medium text-expense-dark">{{ $message }}</p>
+            <p id="{{ $for }}-error" class="text-[13px] font-medium text-expense-dark-fg">{{ $message }}</p>
         @enderror
     @endif
 </div>

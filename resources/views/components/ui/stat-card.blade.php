@@ -3,8 +3,8 @@
 @php
     $dark = $tone === 'dark';
     $valueColor = match ($tone) {
-        'income' => 'text-brand',
-        'expense' => 'text-expense',
+        'income' => 'text-brand-fg',
+        'expense' => 'text-expense-fg',
         default => '',
     };
 @endphp
@@ -14,7 +14,7 @@
     'gap-1.5 rounded-[20px] p-[22px]' => $size === 'md',
     'gap-0.5 rounded-[18px] px-5 py-[18px]' => $size === 'sm',
     'bg-ink text-white' => $dark,
-    'border border-line bg-white' => ! $dark,
+    'border border-line bg-surface' => ! $dark,
 ]) }}>
     <span @class(['text-sm', 'text-on-ink-muted' => $dark, 'text-muted' => ! $dark])>{{ $label }}</span>
     <span @class([

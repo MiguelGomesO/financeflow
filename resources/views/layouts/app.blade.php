@@ -15,6 +15,14 @@
 
     <script>
         try {
+            var theme = localStorage.getItem('theme');
+            if (theme === 'dark' || (theme !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            }
+        } catch (e) {}
+    </script>
+    <script>
+        try {
             if (localStorage.getItem('sidebarCollapsed') === '1') document.documentElement.dataset.sidebar = 'collapsed';
         } catch (e) {}
     </script>
@@ -23,7 +31,7 @@
     @livewireStyles
 </head>
 <body
-    class="bg-canvas font-sans text-[15px] leading-normal text-ink antialiased"
+    class="bg-canvas font-sans text-[15px] leading-normal text-strong antialiased"
     x-data="{
         sidebarOpen: false,
         profileOpen: false,

@@ -4,7 +4,7 @@
 
 @php($progress = $goal['progress'])
 
-<article {{ $attributes->class(['flex h-full flex-col gap-[18px] rounded-[20px] border border-line bg-white p-6']) }}>
+<article {{ $attributes->class(['flex h-full flex-col gap-[18px] rounded-[20px] border border-line bg-surface p-6']) }}>
     <div class="flex items-start justify-between gap-3">
         <div class="flex min-w-0 flex-col gap-0.5">
             <h2 class="truncate font-display text-[19px] font-semibold" title="{{ $goal['name'] }}">{{ $goal['name'] }}</h2>
@@ -37,7 +37,7 @@
         <button
             type="button"
             wire:click="startDeposit({{ $goal['id'] }})"
-            class="min-h-11 flex-1 rounded-xl bg-brand-light text-sm font-semibold text-brand-dark hover:bg-brand hover:text-white"
+            class="min-h-11 flex-1 rounded-xl bg-brand-light text-sm font-semibold text-brand-dark-fg hover:bg-brand hover:text-white"
             aria-label="Depositar em {{ $goal['name'] }}"
         >
             Depositar
@@ -45,7 +45,7 @@
         <button
             type="button"
             wire:click="edit({{ $goal['id'] }})"
-            class="min-h-11 flex-1 rounded-xl border border-line-strong bg-white text-sm font-semibold text-ink hover:bg-mist"
+            class="min-h-11 flex-1 rounded-xl border border-line-strong bg-surface text-sm font-semibold text-strong hover:bg-mist"
             aria-label="Editar {{ $goal['name'] }}"
         >
             Editar

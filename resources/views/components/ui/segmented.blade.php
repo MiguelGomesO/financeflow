@@ -6,7 +6,7 @@
 
 <div role="radiogroup" aria-label="{{ $label }}" {{ $attributes->class(['grid auto-cols-fr grid-flow-col gap-1 rounded-xl bg-mist p-1']) }}>
     @foreach ($options as $value => $text)
-        <label class="flex min-h-9 cursor-pointer items-center justify-center rounded-[9px] px-3.5 text-sm font-semibold whitespace-nowrap text-body transition-colors has-checked:bg-white has-checked:text-ink has-checked:shadow-sm has-focus-visible:ring-2 has-focus-visible:ring-brand">
+        <label class="flex min-h-9 cursor-pointer items-center justify-center rounded-[9px] px-3.5 text-sm font-semibold whitespace-nowrap text-body transition-colors has-checked:bg-surface has-checked:text-strong has-checked:shadow-sm has-focus-visible:ring-2 has-focus-visible:ring-brand">
             <input
                 type="radio"
                 name="{{ $model }}"

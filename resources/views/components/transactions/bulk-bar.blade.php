@@ -2,7 +2,7 @@
 @props(['count', 'total', 'type', 'categories', 'notice' => null])
 
 @if ($notice)
-    <p role="status" class="mb-3 rounded-xl bg-brand-light px-4 py-2.5 text-sm font-medium text-brand-dark">{{ $notice }}</p>
+    <p role="status" class="mb-3 rounded-xl bg-brand-light px-4 py-2.5 text-sm font-medium text-brand-dark-fg">{{ $notice }}</p>
 @endif
 
 @if ($count > 0)
@@ -23,7 +23,7 @@
                     <span class="text-on-ink-muted">Para trocar a categoria, marque só despesas ou só receitas.</span>
                 @else
                     <label for="bulk-category" class="sr-only">Nova categoria</label>
-                    <x-ui.select id="bulk-category" wire:model="bulkCategory" class="input w-auto text-ink">
+                    <x-ui.select id="bulk-category" wire:model="bulkCategory" class="input w-auto text-strong">
                         <option value="">Nova categoria…</option>
                         @foreach ($categories as $category)
                             <option value="{{ $category->id }}">{{ $category->name }}</option>
@@ -50,7 +50,7 @@
         </div>
 
         @error('bulkCategory')
-            <p class="text-[13px] font-medium text-expense-dark">{{ $message }}</p>
+            <p class="text-[13px] font-medium text-expense-dark-fg">{{ $message }}</p>
         @enderror
     </div>
 @endif

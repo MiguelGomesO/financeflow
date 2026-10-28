@@ -98,14 +98,14 @@
 
         @if ($editing)
             @if ($deleteError)
-                <p role="alert" class="rounded-xl bg-expense-light px-3.5 py-2.5 text-sm text-expense-dark">{{ $deleteError }}</p>
+                <p role="alert" class="rounded-xl bg-expense-light px-3.5 py-2.5 text-sm text-expense-dark-fg">{{ $deleteError }}</p>
             @endif
 
             <button
                 type="button"
                 wire:click="deleteEditing"
                 wire:confirm="{{ $editingKind === 'card' ? 'Excluir este cartão?' : 'Excluir esta conta?' }}"
-                class="min-h-11 rounded-xl text-sm font-semibold text-expense-dark hover:bg-expense-light"
+                class="min-h-11 rounded-xl text-sm font-semibold text-expense-dark-fg hover:bg-expense-light"
             >
                 {{ $editingKind === 'card' ? 'Excluir cartão' : 'Excluir conta' }}
             </button>

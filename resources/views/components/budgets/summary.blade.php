@@ -38,7 +38,7 @@
             />
             @if ($pace['state'] === 'current')
                 <span
-                    class="absolute -top-1 -bottom-1 w-0.5 bg-white"
+                    class="absolute -top-1 -bottom-1 w-0.5 bg-surface"
                     style="left: {{ $pace['percent'] }}%"
                     aria-hidden="true"
                 ></span>

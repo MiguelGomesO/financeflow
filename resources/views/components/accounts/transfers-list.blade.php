@@ -16,7 +16,7 @@
                     type="button"
                     wire:click="deleteTransfer({{ $transfer->id }})"
                     wire:confirm="Desfazer esta transferência?"
-                    class="min-h-11 rounded-xl px-3 text-sm font-semibold text-expense-dark hover:bg-expense-light"
+                    class="min-h-11 rounded-xl px-3 text-sm font-semibold text-expense-dark-fg hover:bg-expense-light"
                 >
                     Desfazer
                 </button>

@@ -32,14 +32,14 @@
         role="dialog"
         aria-label="Escolher {{ $mode === 'month' ? 'mês' : 'data' }}"
         x-bind:class="up ? 'bottom-full mb-2' : 'top-full mt-2'"
-        class="absolute left-0 z-50 w-[19rem] max-w-[calc(100vw-2rem)] rounded-2xl border border-line bg-white p-3 shadow-xl"
+        class="absolute left-0 z-50 w-[19rem] max-w-[calc(100vw-2rem)] rounded-2xl border border-line bg-surface p-3 shadow-xl"
     >
         <div class="mb-2 flex items-center justify-between">
-            <button type="button" x-on:click="prev()" class="flex size-10 items-center justify-center rounded-xl text-muted hover:bg-mist hover:text-ink" aria-label="Anterior">
+            <button type="button" x-on:click="prev()" class="flex size-10 items-center justify-center rounded-xl text-muted hover:bg-mist hover:text-strong" aria-label="Anterior">
                 <x-icon name="chevron-left" />
             </button>
             <span class="font-display text-[15px] font-semibold" x-text="title" aria-live="polite"></span>
-            <button type="button" x-on:click="next()" class="flex size-10 items-center justify-center rounded-xl text-muted hover:bg-mist hover:text-ink" aria-label="Próximo">
+            <button type="button" x-on:click="next()" class="flex size-10 items-center justify-center rounded-xl text-muted hover:bg-mist hover:text-strong" aria-label="Próximo">
                 <x-icon name="chevron-right" />
             </button>
         </div>
@@ -77,7 +77,7 @@
                                 class="size-10 rounded-full text-sm tabular-nums hover:bg-mist"
                                 x-bind:class="{
                                     'bg-brand font-semibold text-white hover:bg-brand-dark': value === cell.iso,
-                                    'font-semibold text-brand ring-1 ring-brand/40': value !== cell.iso && isToday(cell.iso),
+                                    'font-semibold text-brand-fg ring-1 ring-brand/40': value !== cell.iso && isToday(cell.iso),
                                 }"
                             ></button>
                         </template>
@@ -87,7 +87,7 @@
         @endif
 
         <div class="mt-2 flex justify-end border-t border-line pt-2">
-            <button type="button" x-on:click="pickToday()" class="min-h-10 rounded-xl px-3 text-sm font-semibold text-brand hover:bg-brand-light">
+            <button type="button" x-on:click="pickToday()" class="min-h-10 rounded-xl px-3 text-sm font-semibold text-brand-fg hover:bg-brand-light">
                 {{ $mode === 'month' ? 'Este mês' : 'Hoje' }}
             </button>
         </div>

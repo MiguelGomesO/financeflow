@@ -8,7 +8,7 @@
             x-init="setTimeout(() => show = false, 4000)"
             x-show="show"
             x-transition.opacity
-            class="flex items-center gap-2.5 rounded-xl bg-brand-light px-4 py-3 text-sm font-medium text-brand-dark"
+            class="flex items-center gap-2.5 rounded-xl bg-brand-light px-4 py-3 text-sm font-medium text-brand-dark-fg"
         >
             <x-icon name="check" class="size-[18px]" />
             {{ session('status') }}
@@ -62,7 +62,7 @@
             </div>
 
             @error('photo')
-                <p id="profile-photo-error" class="rounded-xl bg-expense-light px-4 py-2.5 text-sm font-medium text-expense-dark">{{ $message }}</p>
+                <p id="profile-photo-error" class="rounded-xl bg-expense-light px-4 py-2.5 text-sm font-medium text-expense-dark-fg">{{ $message }}</p>
             @enderror
 
             <dl class="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -78,11 +78,47 @@
         </div>
     </section>
 
+    {{-- Aparência: a escolha fica salva só neste navegador. --}}
+    <section class="flex flex-col gap-5 rounded-[20px] border border-line bg-surface p-6" x-data="themeSwitcher">
+        <header class="flex items-center gap-3">
+            <span class="flex size-10 items-center justify-center rounded-xl bg-brand-light text-brand-dark-fg">
+                <x-icon name="moon" />
+            </span>
+            <div>
+                <h2 class="font-display text-[19px] font-semibold">Aparência</h2>
+                <p class="text-[13px] text-muted">Tema claro ou escuro, salvo neste navegador</p>
+            </div>
+        </header>
+
+        <div role="radiogroup" aria-label="Tema" class="grid gap-3 sm:grid-cols-3">
+            @foreach ([
+                'system' => ['Automático', 'Segue o tema do seu aparelho'],
+                'light' => ['Claro', 'Fundo claro o tempo todo'],
+                'dark' => ['Escuro', 'Fundo escuro, mais confortável à noite'],
+            ] as $value => [$label, $hint])
+                <label class="flex min-h-11 cursor-pointer items-start gap-3 rounded-xl border border-line-strong p-3.5 has-checked:border-brand has-checked:bg-brand-light has-focus-visible:ring-2 has-focus-visible:ring-brand">
+                    <input
+                        type="radio"
+                        name="theme"
+                        value="{{ $value }}"
+                        class="mt-0.5 size-4 accent-brand"
+                        x-bind:checked="mode === '{{ $value }}'"
+                        x-on:change="set('{{ $value }}')"
+                    >
+                    <span class="flex flex-col">
+                        <span class="text-sm font-semibold">{{ $label }}</span>
+                        <span class="text-[13px] text-muted">{{ $hint }}</span>
+                    </span>
+                </label>
+            @endforeach
+        </div>
+    </section>
+
     <div class="grid items-start gap-6 lg:grid-cols-2">
         {{-- Dados pessoais --}}
-        <section class="flex flex-col gap-5 rounded-[20px] border border-line bg-white p-6">
+        <section class="flex flex-col gap-5 rounded-[20px] border border-line bg-surface p-6">
             <header class="flex items-center gap-3">
-                <span class="flex size-10 items-center justify-center rounded-xl bg-brand-light text-brand-dark">
+                <span class="flex size-10 items-center justify-center rounded-xl bg-brand-light text-brand-dark-fg">
                     <x-icon name="user" />
                 </span>
                 <div>
@@ -136,9 +172,9 @@
         </section>
 
         {{-- Segurança --}}
-        <section class="flex flex-col gap-5 rounded-[20px] border border-line bg-white p-6">
+        <section class="flex flex-col gap-5 rounded-[20px] border border-line bg-surface p-6">
             <header class="flex items-center gap-3">
-                <span class="flex size-10 items-center justify-center rounded-xl bg-expense-light text-expense-dark">
+                <span class="flex size-10 items-center justify-center rounded-xl bg-expense-light text-expense-dark-fg">
                     <x-icon name="lock" />
                 </span>
                 <div>
@@ -174,7 +210,7 @@
                             class="input pr-12"
                             @error('currentPassword') aria-invalid="true" aria-describedby="profile-current-password-error" @enderror
                         >
-                        <button type="button" x-on:click="current = !current" class="absolute top-0 right-0 flex size-11 items-center justify-center rounded-xl text-muted hover:text-ink" x-bind:aria-label="current ? 'Ocultar senha' : 'Mostrar senha'">
+                        <button type="button" x-on:click="current = !current" class="absolute top-0 right-0 flex size-11 items-center justify-center rounded-xl text-muted hover:text-strong" x-bind:aria-label="current ? 'Ocultar senha' : 'Mostrar senha'">
                             <x-icon name="eye" class="size-[18px]" x-show="!current" />
                             <x-icon name="eye-off" class="size-[18px]" x-show="current" x-cloak />
                         </button>
@@ -192,7 +228,7 @@
                             class="input pr-12"
                             @error('newPassword') aria-invalid="true" aria-describedby="profile-new-password-error" @enderror
                         >
-                        <button type="button" x-on:click="next = !next" class="absolute top-0 right-0 flex size-11 items-center justify-center rounded-xl text-muted hover:text-ink" x-bind:aria-label="next ? 'Ocultar senha' : 'Mostrar senha'">
+                        <button type="button" x-on:click="next = !next" class="absolute top-0 right-0 flex size-11 items-center justify-center rounded-xl text-muted hover:text-strong" x-bind:aria-label="next ? 'Ocultar senha' : 'Mostrar senha'">
                             <x-icon name="eye" class="size-[18px]" x-show="!next" />
                             <x-icon name="eye-off" class="size-[18px]" x-show="next" x-cloak />
                         </button>

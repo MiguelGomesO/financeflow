@@ -46,6 +46,6 @@
 
     <p class="text-center text-sm text-muted">
         Ainda não tem conta?
-        <a href="{{ route('register') }}" wire:navigate class="font-semibold text-brand hover:text-brand-dark">Criar conta</a>
+        <a href="{{ route('register') }}" wire:navigate class="font-semibold text-brand-fg hover:text-brand-dark-fg">Criar conta</a>
     </p>
 </div>

@@ -81,7 +81,7 @@
                 <x-ui.field label="Termina em (opcional)" for="rec-ends" error="form.endsOn">
                     <x-ui.date-picker id="rec-ends" wire:model="form.endsOn" />
                     @if ($endsOn !== '')
-                        <button type="button" wire:click="clearEnd" class="self-start text-[13px] font-semibold text-brand hover:text-brand-dark">
+                        <button type="button" wire:click="clearEnd" class="self-start text-[13px] font-semibold text-brand-fg hover:text-brand-dark-fg">
                             Sem data final
                         </button>
                     @endif
@@ -106,7 +106,7 @@
                     type="button"
                     wire:click="delete"
                     wire:confirm="Excluir esta recorrência? Os lançamentos que ela já gerou continuam."
-                    class="min-h-11 rounded-xl text-sm font-semibold text-expense-dark hover:bg-expense-light"
+                    class="min-h-11 rounded-xl text-sm font-semibold text-expense-dark-fg hover:bg-expense-light"
                 >
                     Excluir recorrência
                 </button>

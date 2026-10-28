@@ -18,7 +18,7 @@
                 <span class="text-sm text-muted">Saldo previsto em {{ $end }}</span>
                 <span @class([
                     'font-display text-[30px] font-semibold tabular-nums leading-tight',
-                    'text-expense' => $forecast['projected'] < 0,
+                    'text-expense-fg' => $forecast['projected'] < 0,
                 ])>{{ Money::brl($forecast['projected']) }}</span>
             </div>
 
@@ -29,7 +29,7 @@
                 </div>
                 <div class="flex justify-between gap-3">
                     <dt class="text-muted">Entradas previstas</dt>
-                    <dd class="font-medium text-brand">+ {{ Money::brl($forecast['income']) }}</dd>
+                    <dd class="font-medium text-brand-fg">+ {{ Money::brl($forecast['income']) }}</dd>
                 </div>
                 <div class="flex justify-between gap-3">
                     <dt class="text-muted">Saídas previstas</dt>
@@ -38,7 +38,7 @@
             </dl>
 
             @if ($negative)
-                <p role="status" class="rounded-xl bg-expense-light px-4 py-3 text-sm font-medium text-expense-dark">
+                <p role="status" class="rounded-xl bg-expense-light px-4 py-3 text-sm font-medium text-expense-dark-fg">
                     O saldo deve ficar negativo a partir de {{ $forecast['lowest']['date']->format('d/m') }}
                     (até {{ Money::brl($forecast['lowest']['amount']) }}).
                 </p>
@@ -69,7 +69,7 @@
                             </span>
                             <span @class([
                                 'shrink-0 font-semibold tabular-nums',
-                                'text-brand' => $event['amount'] > 0,
+                                'text-brand-fg' => $event['amount'] > 0,
                             ])>{{ Money::brl($event['amount'], signed: true) }}</span>
                         </li>
                     @endforeach

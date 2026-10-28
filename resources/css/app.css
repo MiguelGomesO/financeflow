@@ -6,6 +6,9 @@
 @source '../**/*.js';
 @source '../../app/**/*.php';
 
+/* O modo escuro é uma classe no <html> (veja theme.js); "dark:" de pacotes externos segue a mesma classe. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
     --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
     --font-display: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
@@ -19,6 +22,8 @@
     --color-on-ink-muted: #a9b8b1;
 
     /* Superfícies e texto */
+    --color-surface: #ffffff;
+    --color-strong: #13201c;
     --color-canvas: #f6f7f4;
     --color-mist: #edf0ee;
     --color-line: #e2e7e4;
@@ -32,6 +37,9 @@
     --color-brand-dark: #0a5c43;
     --color-brand-light: #dff3ea;
     --color-mint: #5ee0a8;
+    /* Versões para TEXTO: no escuro clareiam, enquanto as de cima (preenchimento) continuam iguais. */
+    --color-brand-fg: #0e7c5a;
+    --color-brand-dark-fg: #0a5c43;
 
     /* Saídas / alertas */
     --color-expense: #c2410c;
@@ -40,6 +48,42 @@
     --color-expense-light: #fde8da;
     --color-expense-faint: #fef1e6;
     --color-expense-on-ink: #ffa066;
+    --color-expense-fg: #c2410c;
+    --color-expense-dark-fg: #9a3412;
+}
+
+/* Modo escuro: só redefine as variáveis; as classes dos componentes continuam as mesmas. */
+.dark {
+    color-scheme: dark;
+
+    --color-ink: #13221c;
+    --color-ink-800: #1b2e27;
+    --color-ink-700: #223a31;
+    --color-ink-600: #2a4a3e;
+
+    --color-surface: #151f1b;
+    --color-strong: #eaf0ed;
+    --color-canvas: #0d1411;
+    --color-mist: #1e2a25;
+    --color-line: #26332d;
+    --color-line-strong: #34453d;
+    --color-soft: #c9d3ce;
+    --color-body: #b7c2bc;
+    --color-muted: #9aa8a1;
+
+    --color-brand-light: #123528;
+    --color-brand-fg: #4fd1a0;
+    --color-brand-dark-fg: #7fe3bb;
+
+    --color-expense-light: #3a2213;
+    --color-expense-faint: #2a1b11;
+    --color-expense-fg: #fb8d58;
+    --color-expense-dark-fg: #ffb28a;
+}
+
+/* O menu lateral escuro some no canvas escuro sem um filete. */
+.dark #sidebar {
+    border-right: 1px solid var(--color-line);
 }
 
 [x-cloak] {
@@ -66,7 +110,7 @@
 
 @layer components {
     .input {
-        @apply min-h-11 w-full rounded-xl border border-line-strong bg-white px-3.5 text-ink placeholder:text-muted focus:border-brand focus:ring-2 focus:ring-brand/20 focus:outline-none;
+        @apply min-h-11 w-full rounded-xl border border-line-strong bg-surface px-3.5 text-strong placeholder:text-muted focus:border-brand focus:ring-2 focus:ring-brand/20 focus:outline-none;
     }
 }
 

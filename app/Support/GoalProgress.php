@@ -16,8 +16,8 @@ class GoalProgress
 
         [$status, $tag] = match (true) {
             $remaining <= 0 => ['Concluída', 'bg-brand text-white'],
-            $monthsLeft < 0 => ['Prazo vencido', 'bg-expense-light text-expense-dark'],
-            $percent >= 75 => ['Quase lá', 'bg-brand-light text-brand-dark'],
+            $monthsLeft < 0 => ['Prazo vencido', 'bg-expense-light text-expense-dark-fg'],
+            $percent >= 75 => ['Quase lá', 'bg-brand-light text-brand-dark-fg'],
             default => ['Em andamento', 'bg-mist text-soft'],
         };
 

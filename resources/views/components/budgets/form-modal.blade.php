@@ -49,7 +49,7 @@
                     type="button"
                     wire:click="delete"
                     wire:confirm="Excluir este orçamento? As transações não são afetadas."
-                    class="min-h-11 rounded-xl text-sm font-semibold text-expense-dark hover:bg-expense-light"
+                    class="min-h-11 rounded-xl text-sm font-semibold text-expense-dark-fg hover:bg-expense-light"
                 >
                     Excluir orçamento
                 </button>

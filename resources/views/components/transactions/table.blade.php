@@ -70,7 +70,7 @@
                                 x-on:click.stop
                                 title="Ver comprovante"
                                 aria-label="Ver comprovante de {{ $row->description }}"
-                                class="ml-1 inline-flex align-middle text-muted hover:text-brand"
+                                class="ml-1 inline-flex align-middle text-muted hover:text-brand-fg"
                             >
                                 <x-icon name="paperclip" class="size-4" />
                             </a>
@@ -78,7 +78,7 @@
                         @if ($row->tags->isNotEmpty())
                             <div class="flex flex-wrap gap-1 pt-0.5">
                                 @foreach ($row->tags as $tag)
-                                    <span class="rounded-full bg-brand-light px-2 py-0.5 text-xs text-brand-dark">#{{ $tag->name }}</span>
+                                    <span class="rounded-full bg-brand-light px-2 py-0.5 text-xs text-brand-dark-fg">#{{ $tag->name }}</span>
                                 @endforeach
                             </div>
                         @endif
@@ -89,7 +89,7 @@
                     <td class="px-2 py-3 text-muted">{{ $row->source_name }}</td>
                     <td @class([
                         'px-2 py-3 text-right font-semibold tabular-nums whitespace-nowrap',
-                        'text-brand' => $row->amount > 0,
+                        'text-brand-fg' => $row->amount > 0,
                     ])>
                         {{ Money::brl($row->amount, signed: true) }}
                     </td>

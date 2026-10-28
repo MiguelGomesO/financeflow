@@ -52,7 +52,7 @@
                 type="button"
                 wire:click="deleteGoal"
                 wire:confirm="Excluir esta meta e os depósitos dela?"
-                class="min-h-11 rounded-xl text-sm font-semibold text-expense-dark hover:bg-expense-light"
+                class="min-h-11 rounded-xl text-sm font-semibold text-expense-dark-fg hover:bg-expense-light"
             >
                 Excluir meta
             </button>

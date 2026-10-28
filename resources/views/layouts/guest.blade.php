@@ -13,14 +13,22 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 
+    <script>
+        try {
+            var theme = localStorage.getItem('theme');
+            if (theme === 'dark' || (theme !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            }
+        } catch (e) {}
+    </script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
 </head>
-<body class="bg-canvas font-sans text-[15px] leading-normal text-ink antialiased">
+<body class="bg-canvas font-sans text-[15px] leading-normal text-strong antialiased">
     <main class="flex min-h-screen flex-col items-center justify-center gap-6 p-4">
         <x-logo tone="dark" />
 
-        <div class="w-full max-w-md rounded-3xl border border-line bg-white p-6 shadow-sm sm:p-8">
+        <div class="w-full max-w-md rounded-3xl border border-line bg-surface p-6 shadow-sm sm:p-8">
             {{ $slot }}
         </div>
     </main>

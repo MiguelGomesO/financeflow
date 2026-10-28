@@ -24,13 +24,13 @@
                     x-on:click="open = !open"
                     x-bind:aria-expanded="open"
                     aria-haspopup="menu"
-                    class="inline-flex min-h-11 items-center gap-2 rounded-xl border border-line-strong bg-white px-[18px] font-semibold text-ink hover:bg-mist"
+                    class="inline-flex min-h-11 items-center gap-2 rounded-xl border border-line-strong bg-surface px-[18px] font-semibold text-strong hover:bg-mist"
                 >
                     <x-icon name="download" class="size-[18px] rotate-180" />
                     Exportar
                 </button>
 
-                <div x-show="open" x-cloak role="menu" class="absolute right-0 z-20 mt-2 w-44 overflow-hidden rounded-xl border border-line-strong bg-white py-1 shadow-lg">
+                <div x-show="open" x-cloak role="menu" class="absolute right-0 z-20 mt-2 w-44 overflow-hidden rounded-xl border border-line-strong bg-surface py-1 shadow-lg">
                     @foreach (['csv' => 'CSV (.csv)', 'xlsx' => 'Excel (.xlsx)', 'pdf' => 'PDF (.pdf)'] as $format => $label)
                         <button
                             type="button"

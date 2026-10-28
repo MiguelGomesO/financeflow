@@ -9,7 +9,7 @@
     $left = $budget->limit - $spent;
 @endphp
 
-<article {{ $attributes->class(['flex flex-col gap-3.5 rounded-[20px] border border-line bg-white p-[22px]']) }}>
+<article {{ $attributes->class(['flex flex-col gap-3.5 rounded-[20px] border border-line bg-surface p-[22px]']) }}>
     <div class="flex items-center justify-between gap-2">
         <div class="flex min-w-0 items-center gap-3">
             <span class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-mist font-bold text-soft" aria-hidden="true">

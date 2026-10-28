@@ -25,7 +25,7 @@
             role="dialog"
             aria-modal="true"
             aria-labelledby="{{ $name }}-title"
-            {{ $attributes->class(['flex w-full max-w-md flex-col gap-4 rounded-3xl bg-white p-6 shadow-xl']) }}
+            {{ $attributes->class(['flex w-full max-w-md flex-col gap-4 rounded-3xl bg-surface p-6 shadow-xl']) }}
         >
             <div class="flex items-center justify-between">
                 <h2 id="{{ $name }}-title" class="font-display text-xl font-semibold">{{ $title }}</h2>

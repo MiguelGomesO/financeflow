@@ -2,7 +2,7 @@
     <x-logo tone="dark" />
     <button
         type="button"
-        class="flex size-11 items-center justify-center rounded-xl border border-line-strong bg-white text-ink"
+        class="flex size-11 items-center justify-center rounded-xl border border-line-strong bg-surface text-strong"
         x-on:click="sidebarOpen = true"
         aria-label="Abrir menu"
         aria-controls="sidebar"

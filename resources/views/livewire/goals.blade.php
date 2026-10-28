@@ -24,7 +24,7 @@
     </div>
 
     @if (empty($items))
-        <div class="flex flex-col items-center gap-3 rounded-[20px] border border-dashed border-line-strong bg-white px-6 py-12 text-center">
+        <div class="flex flex-col items-center gap-3 rounded-[20px] border border-dashed border-line-strong bg-surface px-6 py-12 text-center">
             <p class="text-muted">Você ainda não tem metas.</p>
             <button type="button" wire:click="create" class="min-h-11 rounded-xl border border-line-strong px-4 text-sm font-semibold hover:bg-mist">
                 Criar a primeira

@@ -4,7 +4,7 @@
     <button
         type="button"
         wire:click="open"
-        class="inline-flex min-h-11 items-center gap-2 rounded-xl border border-line-strong bg-white px-[18px] font-semibold text-ink hover:bg-mist"
+        class="inline-flex min-h-11 items-center gap-2 rounded-xl border border-line-strong bg-surface px-[18px] font-semibold text-strong hover:bg-mist"
     >
         <x-icon name="download" class="size-[18px]" />
         Importar extrato
@@ -14,7 +14,7 @@
         @if ($accounts->isEmpty() && $cards->isEmpty())
             <p class="text-body">Cadastre uma conta ou cartão antes de importar um extrato.</p>
         @elseif ($done)
-            <div class="flex flex-col items-start gap-3 rounded-2xl bg-brand-light p-5 text-brand-dark" role="status">
+            <div class="flex flex-col items-start gap-3 rounded-2xl bg-brand-light p-5 text-brand-dark-fg" role="status">
                 <p class="font-display text-xl font-semibold">
                     {{ $done['imported'] }} {{ $done['imported'] === 1 ? 'lançamento importado' : 'lançamentos importados' }}
                 </p>
@@ -52,7 +52,7 @@
                         type="file"
                         wire:model="file"
                         accept=".xlsx,.xls,.pdf,.ofx,.qfx"
-                        class="input py-2.5 file:mr-3 file:rounded-lg file:border-0 file:bg-brand-light file:px-3 file:py-1.5 file:text-sm file:font-semibold file:text-brand-dark"
+                        class="input py-2.5 file:mr-3 file:rounded-lg file:border-0 file:bg-brand-light file:px-3 file:py-1.5 file:text-sm file:font-semibold file:text-brand-dark-fg"
                         @error('file') aria-invalid="true" aria-describedby="import-file-error" @enderror
                     >
                 </x-ui.field>
@@ -103,15 +103,15 @@
 
             @php($flagged = collect($rows)->filter(fn ($row) => $row['duplicate'] || $row['similarTo'] !== null)->count())
             @if ($flagged > 0)
-                <p class="rounded-xl bg-expense-faint px-4 py-3 text-sm text-expense-dark" role="status">
+                <p class="rounded-xl bg-expense-faint px-4 py-3 text-sm text-expense-dark-fg" role="status">
                     <strong>{{ $flagged }}</strong> {{ $flagged === 1 ? 'linha parece já ter sido lançada e foi desmarcada' : 'linhas parecem já ter sido lançadas e foram desmarcadas' }}.
                     Marque de volta as que forem compras diferentes.
                 </p>
             @endif
 
             <div class="flex flex-wrap gap-x-4 gap-y-1 text-sm">
-                <button type="button" wire:click="toggleAll(true)" class="font-semibold text-brand hover:text-brand-dark">Marcar todos</button>
-                <button type="button" wire:click="toggleAll(false)" class="font-semibold text-brand hover:text-brand-dark">Desmarcar todos</button>
+                <button type="button" wire:click="toggleAll(true)" class="font-semibold text-brand-fg hover:text-brand-dark-fg">Marcar todos</button>
+                <button type="button" wire:click="toggleAll(false)" class="font-semibold text-brand-fg hover:text-brand-dark-fg">Desmarcar todos</button>
             </div>
 
             <ul class="flex max-h-[45vh] flex-col divide-y divide-line overflow-y-auto">
@@ -131,11 +131,11 @@
                         <div class="col-span-3 col-start-1 row-start-2 flex min-w-0 flex-col sm:col-span-1 sm:col-start-auto sm:row-start-auto">
                             <span class="truncate font-medium" title="{{ $row['description'] }}">{{ $row['description'] }}</span>
                             @if ($row['duplicate'])
-                                <span class="text-xs font-semibold text-expense-dark">Parece já lançado</span>
+                                <span class="text-xs font-semibold text-expense-dark-fg">Parece já lançado</span>
                             @elseif ($row['similarTo'])
-                                <span class="truncate text-xs font-semibold text-expense-dark" title="{{ $row['similarTo'] }}">Parecido com “{{ $row['similarTo'] }}”</span>
+                                <span class="truncate text-xs font-semibold text-expense-dark-fg" title="{{ $row['similarTo'] }}">Parecido com “{{ $row['similarTo'] }}”</span>
                             @elseif ($row['error'])
-                                <span class="text-xs font-semibold text-expense-dark">{{ $row['error'] }}</span>
+                                <span class="text-xs font-semibold text-expense-dark-fg">{{ $row['error'] }}</span>
                             @endif
                         </div>
 
@@ -152,8 +152,8 @@
 
                         <span @class([
                             'justify-self-end font-display font-semibold tabular-nums whitespace-nowrap',
-                            'text-brand' => $row['amount'] > 0,
-                            'text-expense' => $row['amount'] < 0,
+                            'text-brand-fg' => $row['amount'] > 0,
+                            'text-expense-fg' => $row['amount'] < 0,
                         ])>{{ Money::brl($row['amount'], signed: true) }}</span>
                     </li>
                 @endforeach
@@ -162,8 +162,8 @@
             <div class="flex flex-wrap items-center justify-between gap-3 border-t border-line pt-4">
                 <p class="text-sm text-body">
                     <strong>{{ $summary['count'] }}</strong> selecionados ·
-                    <span class="text-brand">{{ Money::brl($summary['income']) }}</span> de entradas ·
-                    <span class="text-expense">{{ Money::brl($summary['expense']) }}</span> de saídas
+                    <span class="text-brand-fg">{{ Money::brl($summary['income']) }}</span> de entradas ·
+                    <span class="text-expense-fg">{{ Money::brl($summary['expense']) }}</span> de saídas
                 </p>
 
                 <div class="flex gap-2">

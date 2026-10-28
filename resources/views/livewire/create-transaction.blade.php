@@ -24,7 +24,7 @@
                         <span wire:loading wire:target="save">Salvando…</span>
                     </button>
 
-                    <p x-show="saved" x-transition.opacity x-cloak role="status" class="text-center text-sm font-medium text-brand">
+                    <p x-show="saved" x-transition.opacity x-cloak role="status" class="text-center text-sm font-medium text-brand-fg">
                         Transação adicionada.
                     </p>
                 </form>

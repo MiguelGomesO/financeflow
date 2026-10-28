@@ -34,7 +34,7 @@
     @endif
 
     @if ($hasFilters)
-        <button type="button" wire:click="clearFilters" class="min-h-11 rounded-xl px-3 text-sm font-semibold text-brand hover:bg-brand-light">
+        <button type="button" wire:click="clearFilters" class="min-h-11 rounded-xl px-3 text-sm font-semibold text-brand-fg hover:bg-brand-light">
             Limpar filtros
         </button>
     @endif

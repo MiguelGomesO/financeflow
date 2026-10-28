@@ -48,7 +48,7 @@
         data-select-list
         role="listbox"
         x-bind:style="listStyle"
-        class="fixed z-[60] flex flex-col gap-0.5 overflow-y-auto rounded-xl border border-line bg-white p-1.5 text-ink shadow-xl"
+        class="fixed z-[60] flex flex-col gap-0.5 overflow-y-auto rounded-xl border border-line bg-surface p-1.5 text-strong shadow-xl"
     >
         <template x-for="(group, g) in groups" x-bind:key="g">
             <div class="flex flex-col gap-0.5">
@@ -69,14 +69,14 @@
                         class="flex min-h-10 cursor-pointer items-center justify-between gap-3 rounded-lg px-2.5 text-sm"
                         x-bind:class="{
                             'bg-mist': active === option.index,
-                            'font-semibold text-brand-dark': isSelected(option),
+                            'font-semibold text-brand-dark-fg': isSelected(option),
                             'cursor-not-allowed opacity-50': option.disabled,
                         }"
                     >
                         <span class="truncate" x-text="option.text"></span>
                         <svg
                             x-show="isSelected(option)"
-                            class="size-4 shrink-0 text-brand"
+                            class="size-4 shrink-0 text-brand-fg"
                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
                         ><path d="M20 6 9 17l-5-5" /></svg>
                     </div>
