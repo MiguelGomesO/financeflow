@@ -8,6 +8,7 @@ use App\Livewire\Dashboard;
 use App\Livewire\Goals;
 use App\Livewire\Profile;
 use App\Livewire\Recurring;
+use App\Livewire\Reports;
 use App\Livewire\Transactions;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -21,6 +22,7 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::livewire('/', Dashboard::class)->name('dashboard');
     Route::livewire('/transacoes', Transactions::class)->name('transactions');
+    Route::livewire('/relatorios', Reports::class)->name('reports');
     Route::livewire('/recorrentes', Recurring::class)->name('recurring');
     Route::livewire('/orcamentos', Budgets::class)->name('budgets');
     Route::livewire('/metas', Goals::class)->name('goals');

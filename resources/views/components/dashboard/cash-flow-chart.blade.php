@@ -1,11 +1,11 @@
 @use('App\Support\Money')
-@props(['months'])
+@props(['months', 'title' => 'Entradas x saídas'])
 
 @php
     $max = max(array_merge(array_column($months, 'income'), array_column($months, 'expense'))) ?: 1;
 @endphp
 
-<x-ui.card title="Entradas x saídas">
+<x-ui.card :title="$title">
     <x-slot:header>
         <div class="flex gap-4 text-[13px] text-soft">
             <span class="flex items-center gap-1.5"><span class="size-2.5 rounded-[3px] bg-brand"></span>Entradas</span>
@@ -14,8 +14,9 @@
     </x-slot:header>
 
     <div>
-        <div class="grid h-56 grid-cols-6 items-end gap-3 border-b border-line">
+        <div class="grid h-56 items-end gap-3 border-b border-line" style="grid-template-columns: repeat({{ count($months) }}, minmax(0, 1fr))">
             @foreach ($months as $month)
+                @php($edge = $loop->first ? 'left-0' : ($loop->last ? 'right-0' : 'left-1/2 -translate-x-1/2'))
                 <button
                     type="button"
                     wire:key="month-{{ $month['label'] }}"
@@ -37,7 +38,7 @@
                         x-show="show"
                         x-transition.opacity
                         x-cloak
-                        class="pointer-events-none absolute top-0 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap rounded-lg bg-ink px-3 py-2 text-left text-xs text-white shadow-lg"
+                        class="pointer-events-none absolute top-0 z-10 {{ $edge }} whitespace-nowrap rounded-lg bg-ink px-3 py-2 text-left text-xs text-white shadow-lg"
                     >
                         <span class="block font-semibold capitalize">{{ $month['name'] }}</span>
                         <span class="block text-mint tabular-nums">+ {{ Money::brl($month['income']) }}</span>
@@ -47,7 +48,7 @@
             @endforeach
         </div>
 
-        <div class="mt-2 grid grid-cols-6 gap-3 text-center text-[13px] text-muted" aria-hidden="true">
+        <div class="mt-2 grid gap-3 text-center text-[13px] text-muted" style="grid-template-columns: repeat({{ count($months) }}, minmax(0, 1fr))" aria-hidden="true">
             @foreach ($months as $month)
                 <span>{{ $month['label'] }}</span>
             @endforeach

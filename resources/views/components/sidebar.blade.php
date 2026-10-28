@@ -45,6 +45,7 @@
     <nav aria-label="Menu do app" class="flex flex-col gap-1">
         <x-sidebar.link :href="route('dashboard')" icon="overview" :active="request()->routeIs('dashboard')">Visão geral</x-sidebar.link>
         <x-sidebar.link :href="route('transactions')" icon="transactions" :active="request()->routeIs('transactions')">Transações</x-sidebar.link>
+        <x-sidebar.link :href="route('reports')" icon="trend" :active="request()->routeIs('reports')">Relatórios</x-sidebar.link>
         <x-sidebar.link :href="route('recurring')" icon="repeat" :active="request()->routeIs('recurring')">Recorrentes</x-sidebar.link>
         <x-sidebar.link :href="route('budgets')" icon="budget" :active="request()->routeIs('budgets')">Orçamentos</x-sidebar.link>
         <x-sidebar.link :href="route('goals')" icon="goal" :active="request()->routeIs('goals')">Metas</x-sidebar.link>
