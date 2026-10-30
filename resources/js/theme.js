@@ -46,6 +46,17 @@ query.addEventListener('change', () => {
     }
 });
 
+// A escolha vale para todas as telas: reaplica ao navegar (wire:navigate), ao voltar pelo
+// histórico e quando outra aba do navegador muda o tema.
+document.addEventListener('livewire:navigated', () => applyTheme(storedMode()));
+window.addEventListener('pageshow', () => applyTheme(storedMode()));
+window.addEventListener('storage', (event) => {
+    if (event.key === KEY || event.key === null) {
+        applyTheme(storedMode());
+        window.dispatchEvent(new CustomEvent('theme-changed', { detail: storedMode() }));
+    }
+});
+
 /** Componente Alpine: x-data="themeSwitcher". */
 export default function themeSwitcher() {
     return {

@@ -5,6 +5,7 @@ namespace App\Queries;
 use App\Models\Account;
 use App\Models\Budget;
 use App\Models\Goal;
+use App\Models\GoalDeposit;
 use App\Models\Transaction;
 use App\Support\BudgetStatus;
 use App\Support\Dates;
@@ -31,7 +32,7 @@ class DashboardQuery
 
         return [
             'count' => $accounts->count(),
-            'balance' => round($accounts->sum('balance'), 2),
+            'balance' => round($accounts->sum('balance') - GoalDeposit::totalSaved(), 2),
         ];
     }
 

@@ -62,9 +62,13 @@
         x-bind:aria-label="dark ? 'Mudar para o modo claro' : 'Mudar para o modo escuro'"
         x-bind:title="sidebarCollapsed ? (dark ? 'Modo claro' : 'Modo escuro') : null"
     >
-        <x-icon name="moon" x-show="!dark" />
-        <x-icon name="sun" x-show="dark" x-cloak />
-        <span x-bind:class="{ 'lg:hidden': sidebarCollapsed }" x-text="dark ? 'Modo claro' : 'Modo escuro'">Modo escuro</span>
+        {{-- Ícone e texto seguem a classe "dark" do <html> (posta antes da primeira pintura), sem esperar o Alpine. --}}
+        <span class="flex dark:hidden"><x-icon name="moon" /></span>
+        <span class="hidden dark:flex"><x-icon name="sun" /></span>
+        <span x-bind:class="{ 'lg:hidden': sidebarCollapsed }">
+            <span class="dark:hidden">Modo escuro</span>
+            <span class="hidden dark:inline">Modo claro</span>
+        </span>
     </button>
 
     {{-- Menu aberto: foto e nome. Recolhido: só a foto. Ao clicar abre o menu do perfil (renderizado fora do menu lateral, que corta o que passa da borda). --}}

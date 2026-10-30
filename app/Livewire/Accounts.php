@@ -6,6 +6,7 @@ use App\Livewire\Forms\AccountForm;
 use App\Livewire\Forms\TransferForm;
 use App\Models\Account;
 use App\Models\CreditCard;
+use App\Models\GoalDeposit;
 use App\Models\Transfer;
 use App\Support\Money;
 use Livewire\Attributes\Title;
@@ -182,7 +183,7 @@ class Accounts extends Component
         $bills = $cards->mapWithKeys(fn (CreditCard $card) => [$card->id => $card->openBill()]);
         $used = $cards->mapWithKeys(fn (CreditCard $card) => [$card->id => $card->usedLimit()]);
         $upcoming = $cards->mapWithKeys(fn (CreditCard $card) => [$card->id => $card->upcomingBills()]);
-        $balance = round($accounts->sum('balance'), 2);
+        $balance = round($accounts->sum('balance') - GoalDeposit::totalSaved(), 2);
         $billsTotal = round($bills->sum(), 2);
 
         return view('livewire.accounts', [

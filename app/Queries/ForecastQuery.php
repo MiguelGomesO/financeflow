@@ -3,6 +3,7 @@
 namespace App\Queries;
 
 use App\Models\Account;
+use App\Models\GoalDeposit;
 use App\Models\RecurringTransaction;
 use App\Models\Transaction;
 use Carbon\CarbonImmutable;
@@ -44,6 +45,7 @@ class ForecastQuery
         // Saldo de hoje: o app soma tudo que está cadastrado; aqui fica de fora o que ainda vai acontecer.
         $balance = round(
             Account::query()->withBalance()->get()->sum('balance')
+            - GoalDeposit::totalSaved()
             - (float) Transaction::query()->whereNotNull('account_id')->where('date', '>', $this->today->toDateString())->sum('amount'),
             2,
         );

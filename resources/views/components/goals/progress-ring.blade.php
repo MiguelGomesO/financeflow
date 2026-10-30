@@ -15,5 +15,5 @@
         stroke-dasharray="{{ round($filled, 1) }} {{ round($circumference, 1) }}"
         transform="rotate(-90 48 48)"
     />
-    <text x="48" y="54" text-anchor="middle" class="fill-ink font-display text-[20px] font-bold">{{ (int) floor($percent) }}%</text>
+    <text x="48" y="54" text-anchor="middle" class="fill-strong font-display text-[20px] font-bold">{{ (int) floor($percent) }}%</text>
 </svg>

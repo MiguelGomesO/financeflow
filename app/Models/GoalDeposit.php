@@ -29,6 +29,12 @@ class GoalDeposit extends Model
         return Attribute::set(fn ($value) => Carbon::parse($value)->toDateString());
     }
 
+    /** Total reservado em todas as metas (descontado do saldo disponível). */
+    public static function totalSaved(): float
+    {
+        return round((float) static::query()->sum('amount'), 2);
+    }
+
     public function goal(): BelongsTo
     {
         return $this->belongsTo(Goal::class);

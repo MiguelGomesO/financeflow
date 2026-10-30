@@ -117,14 +117,25 @@
 </x-ui.field>
 
 <x-ui.field label="Comprovante (opcional)" for="{{ $prefix }}-attachment" error="form.attachment">
-    <input
-        id="{{ $prefix }}-attachment"
-        type="file"
-        wire:model="form.attachment"
-        accept="image/jpeg,image/png,image/webp,application/pdf"
-        class="input text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-mist file:px-3 file:py-1.5 file:text-sm file:font-semibold"
-        @error('form.attachment') aria-invalid="true" aria-describedby="{{ $prefix }}-attachment-error" @enderror
-    >
+    <div x-data="{ name: '' }" class="flex items-center gap-3">
+        <input
+            id="{{ $prefix }}-attachment"
+            type="file"
+            wire:model="form.attachment"
+            accept="image/jpeg,image/png,image/webp,application/pdf"
+            x-on:change="name = $event.target.files[0]?.name ?? ''"
+            class="peer sr-only"
+            @error('form.attachment') aria-invalid="true" aria-describedby="{{ $prefix }}-attachment-error" @enderror
+        >
+        <label
+            for="{{ $prefix }}-attachment"
+            class="inline-flex shrink-0 cursor-pointer items-center gap-2 rounded-xl border border-dashed border-brand/40 bg-brand-light px-4 py-2.5 text-sm font-semibold text-brand-dark-fg transition hover:border-brand peer-focus-visible:ring-2 peer-focus-visible:ring-brand"
+        >
+            <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+            Anexar comprovante
+        </label>
+        <span x-text="name || 'Nenhum arquivo selecionado'" class="min-w-0 truncate text-sm text-muted"></span>
+    </div>
     <span wire:loading wire:target="form.attachment" class="text-[13px] text-muted">Enviando…</span>
     <span class="text-[13px] text-muted">Foto ou PDF, até 5 MB.</span>
 </x-ui.field>
